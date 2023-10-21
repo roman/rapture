@@ -1,0 +1,348 @@
+#+title: Doom.d Configuration
+#+PROPERTY: header-args:emacs-lisp :noweb yes :results none :tangle config.el
+
+* About Doom.d Configuration
+** General Notes
+
+Whenever you reconfigure a package, wrap your config in an =after!= block.
+Otherwise, Doom's defaults may override your settings. E.g.
+
+#+begin_src emacs-lisp :tangle no
+   (after! PACKAGE
+     (setq x y))
+#+end_src
+
+The exceptions to this rule:
+
+   - Setting file/directory variables (like =org-directory=)
+   - Setting variables that explicitly tell you to set them before their package
+     is loaded (see =C-h v VARIABLE= to review their documentation).
+   - Setting doom variables (which start with 'doom-' or '+').
+
+ Here are some additional functions/macros that will help you configure Doom.
+
+ - =load!= for loading external =*.el= files relative to this one
+ - =use-package!= for configuring packages
+ - =after!= for running code after a package has loaded
+ - =add-load-path!= for adding directories to the =load-path=, relative to
+   this file. Emacs searches the =load-path= when you load packages with
+   =require= or =use-package=.
+ - =map!= for binding new keys
+
+ To get information about these functions/macros, move the cursor over the
+ highlighted symbol and press =K= (non-evil users must press =C-c c k=). This
+ command will open documentation for it, including demos of how to use them.
+ Alternatively, use =C-h o= to look up a symbol (functions, variables, faces,
+ etc).
+
+ You can also try =gd= (or =C-c c d=) to jump to a symbol definition and see how
+ authors implemented a function.
+
+** About adding keybindings to existing namespaces
+
+When writing entries on an existing prefix, we must do it _after_ doom has
+initialized. For this reason we use =add-hook! 'doom-after-init-modules-hook= in
+a bunch of places.
+
+* Preliminaries
+
+Use [[https://www.emacswiki.org/emacs/LexicalBinding][lexical binding]]:
+
+#+begin_src emacs-lisp
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+#+end_src
+
+* User Information
+
+Some functionality uses this to identify you, e.g., GPG configuration, email
+clients, file templates, and snippets. It is optional.
+
+#+begin_src emacs-lisp
+(setq user-full-name "Roman Gonzalez"
+      user-mail-address "open-source@roman-gonzalez.info")
+#+end_src
+
+* Embedded Terminal
+
+- Allow emacs =vterm= to use the bash instance managed by =nix=
+
+  #+begin_src emacs-lisp
+  (setq vterm-shell
+        "/run/current-system/sw/bin/bash")
+  #+end_src
+
+- Override =SPC o t= to use a custom =vterm-toggle=, the default one drives me insane.
+
+  #+begin_src emacs-lisp
+  (add-hook! 'doom-after-init-modules-hook
+      (map!
+       :leader
+       (:prefix ("o" . "open")
+        :desc "Toggle vterm popup" :n "t" '+zoo/vterm-toggle)))
+  #+end_src
+
+- =DELETE= is not bound on the terminal keybindings, not sure why.
+
+  #+begin_src emacs-lisp
+  (add-hook! 'doom-after-init-modules-hook
+    (map!
+       :after vterm
+       :map vterm-mode-map
+       :desc "Send vterm DELETE" :i (kbd "<deletechar>") 'vterm-send-delete))
+  #+end_src
+
+* Fonts
+- =doom-variable-pitch-font= -- a non-monospace font (where applicable)
+- =doom-big-font= -- used for `doom-big-font-mode'; use this for
+  presentations or streaming.
+- =doom-unicode-font= -- for Unicode glyphs
+- =doom-serif-font= -- for the `fixed-pitch-serif' face
+
+See =C-h v doom-font= for documentation and more examples of what they accept.
+For example:
+
+#+begin_src emacs-lisp :tangle no
+(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
+      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+#+end_src
+
+If you or Emacs can't find your font, use =M-x describe-font= to look them up,
+=M-x eval-region= to execute elisp code, and =M-x doom/reload-font= to refresh
+your font settings. If Emacs still can't find your font, it likely wasn't
+installed correctly. Font issues are rarely Doom issues!
+
+There are two ways to load a theme. Both assume the theme is installed and
+available. You can set =doom-theme= or manually load a theme with the
+=load-theme= function. This theme is the one I like:
+
+#+begin_src emacs-lisp
+(setq doom-theme 'doom-monokai-pro)
+#+end_src
+
+* Text Editor UI
+** Line Numbering
+
+This variable determines the style of line numbers in effect. If set to =nil=,
+line numbers are disabled. For relative line numbers, set this to =relative=.
+
+#+begin_src emacs-lisp
+(setq display-line-numbers-type t)
+#+end_src
+
+** Buffer names
+
+=doom-emacs= by default, uses brackets and numbers when having two buffers with
+the same name, like so:
+
+#+begin_text
+config.org<1>    ...
+config.org<2>    ...
+#+end_text
+
+Not great.
+
+What I want is to include the parent directories in brackets instead, like so:
+
+#+begin_text
+config.org<doom.d>    ...
+config.org<zoo>       ...
+#+end_text
+
+The change below accomplishes this setup:
+
+#+begin_src emacs-lisp
+(after! ivy
+  (setq uniquify-buffer-name-style 'post-forward-angle-brackets))
+#+end_src
+
+* Org Mode
+** Org Roam
+
+[[https://www.orgroam.com/][org-roam]] gives super-powers to the vanilla =org-mode= experience. It does DB
+indexing, daily note management, and graph search. Pure <3.
+
+#+begin_src emacs-lisp
+(after! org-roam
+  (setq org-roam-directory "~/Projects/notes"))
+#+end_src
+
+** Enhancements to the default configuration
+
+When creating org entries, I would like to have IDs generated for each top-level
+item so that =org-roam= node insertion works more effectively.
+
+Also, have a dedicated drawer for clock-ins as well as automatic clock-ins and
+clock-outs when the TODO state changes.
+
+#+begin_src emacs-lisp
+(use-package! org
+  :preface
+  (add-hook 'org-insert-heading-hook
+            'zoo/org-insert-heading-hook)
+
+  (add-hook 'org-clock-out-hook
+            'zoo/org-clock-out-hook)
+
+  (add-hook 'org-after-todo-state-change-hook
+            'zoo/org-after-todo-state-change-hook)
+
+  (add-hook 'org-after-demote-entry-hook
+            'zoo/org-after-demote-entry-hook)
+
+  (add-hook 'org-after-promote-entry-hook
+            'zoo/org-after-promote-entry-hook)
+  :config
+  ;; Have a special :LOGBOOK: drawer for clocks
+  (setq org-clock-into-drawer "CLOCK")
+  ;; Don't register clocks with zero-time length
+  (setq org-clock-out-remove-zero-time-clocks t)
+  ;; Stop clock when a task gets to state DONE.
+  (setq org-clock-out-when-done t)
+  ;; Resolve open-clocks if idle more than 10 minutes
+  (setq org-clock-idle-time 10)
+  ;; When clocking in, change the status of the item to
+  ;; STARTED
+  (setq org-clock-in-switch-to-state "STARTED")
+  ;; Save the clock and entry when I close emacs
+  (setq org-clock-persist t)
+  ;; When clocking out, change the status of the item to
+  ;; PAUSED
+  (setq org-clock-out-switch-to-state nil))
+#+end_src
+
+* Spacemacs compatibility
+
+I miss some configurations from Spacemacs. Could you bring them back here?
+
+#+begin_src emacs-lisp
+(map!
+ :leader
+ :desc "Switch to alternate buffer"  :n "TAB" 'spacemacs/alternate-buffer
+ :desc "Clear vim search highlights" :n "s c" 'spacemacs/evil-search-clear-highlight)
+
+(map!
+ :desc "Winner Undo" "C-c <left>" 'winner-undo
+ :desc "Winner Redo" "C-c <right>" 'winner-redo)
+#+end_src
+
+* Code jumping
+
+Introduce jumping mechanisms that are on the code menu, these utilities are
+defined with =C-= prefixes, but I like some consistency in the jumping options
+in the =SPC c= menu.
+
+#+begin_src emacs-lisp
+(add-hook! 'doom-after-init-modules-hook
+  (map!
+   :leader
+   :map global-map
+   :desc "Back to jump" :n "c n" 'better-jumper-jump-forward
+   :desc "Back from jump" :n "c p" 'better-jumper-jump-backward))
+#+end_src
+
+* Yanking utilities
+
+Provide ways to get the contents from copy/deletions.
+
+** List recent yanks
+
+Provide me a list of all the Yanks I've done in the past
+
+#+begin_src emacs-lisp
+(map!
+ :leader
+ (:prefix ("r" . "recent")
+  :desc "Display recent yanks" :n "y" 'counsel-yank-pop))
+#+end_src
+
+** Render a tree with undo changes
+
+Please get me a tree view of the undo clipboard
+
+#+begin_src emacs-lisp
+(use-package! undo-tree
+  :commands global-undo-tree-mode)
+
+(map!
+ :leader
+ (:prefix ("a" . "app")
+  (:desc "Display undo-tree" :n "u" 'undo-tree-visualize)))
+#+end_src
+* Application hooks
+
+This keybinding facilitates executing an emacs function after saving a file.
+They help run unit tests after modifying a file.
+
+#+begin_src emacs-lisp
+(map!
+ :leader
+ (:prefix ("a" . "app")
+  (:prefix ("h" . "hooks")
+   :desc "Run continously after save" :n "s" 'zoo/run-continously-after-save
+   :desc "Add after-save hook" :n "f" 'zoo/add-after-save-hook
+   :desc "Add after-save hook" :n "a" 'zoo/add-after-save-hook-kbd
+   :desc "Remove after-save hook" :n "r" 'zoo/remove-after-save-hook
+   :desc "Toggle last after-save hook" :n "t" 'zoo/toggle-last-after-save-hook)))
+#+end_src
+
+* Nix support
+** Search nix flake inputs
+
+Add keybindings to search input sources in a flake project. With these
+keybindings I'm able to gather contents from nix flake dependencies for quick
+debugging.
+
+#+begin_src emacs-lisp
+(add-hook! 'doom-after-init-modules-hook
+  (progn
+    (map!
+     :leader
+     (:prefix ("f n" . "nix")
+      :desc "Find file in flake's nixpkgs" :n "p" #'+zoo/nix-flake-find-file-in-nixpkgs
+      :desc "Find file in flake's input" :n "i" #'+zoo/nix-flake-find-file-in-input))
+    (map!
+     :leader
+     (:prefix ("s n" . "nix")
+      :desc "Search in flake's nixpkgs" :n "p" #'+zoo/nix-flake-search-in-nixpkgs
+      :desc "Search in flake's input"   :n "i" #'+zoo/nix-flake-search-in-input))))
+#+end_src
+
+* golden-ratio support
+
+Sometimes, I want to work on small screens. =golden-ratio= performs auto-resizes
+on the Emacs' windows I'm working on.
+
+#+begin_src emacs-lisp
+(use-package! golden-ratio
+  :config
+  (setq golden-ratio-auto-scale t))
+
+(add-hook! 'doom-after-init-modules-hook
+  (map!
+   :leader
+   :desc "Toggle golden-ratio"
+   "t G" #'golden-ratio-mode))
+#+end_src
+
+* Grammarly
+
+Setup =lsp-grammarly= so that my "English as a second language" condition
+doesn't manifest as much.
+
+#+begin_src emacs-lisp
+(use-package-hook! lsp-ui
+  :post-config
+  (setq lsp-ui-doc-show-with-cursor t)
+  (setq lsp-ui-doc-max-height 60)
+  t)
+
+(after! lsp-ui
+  (setq lsp-ui-doc-show-with-cursor t)
+  (setq lsp-ui-doc-max-height 60))
+
+(use-package! lsp-grammarly
+  :hook ((text-mode . lsp-mode)
+         (markdown-mode . lsp-mode)
+         (org-mode . lsp-mode))
+  )
+#+end_src
