@@ -3,7 +3,7 @@ inputs: { lib, rsync, stdenv, emacs, coreutils }:
 stdenv.mkDerivation {
   pname   = "rapture";
   version = "0.1";
-  src = ./.;
+  src = ./src;
 
   buildInputs = [ emacs coreutils ];
   buildPhase = ''

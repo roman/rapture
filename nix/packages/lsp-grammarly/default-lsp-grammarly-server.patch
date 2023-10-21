@@ -1,0 +1,13 @@
+diff --git a/lsp-grammarly.el b/lsp-grammarly.el
+index aaccd21..475f89e 100644
+--- a/lsp-grammarly.el
++++ b/lsp-grammarly.el
+@@ -47,7 +47,7 @@ Link: https://github.com/znck/grammarly"
+   :group 'lsp-mode
+   :link '(url-link "https://github.com/emacs-grammarly/lsp-grammarly"))
+ 
+-(defcustom lsp-grammarly-server-path nil
++(defcustom lsp-grammarly-server-path "@grammarly-languageserver@"
+   "Path points for Grammarly LSP.
+ 
+ This is only for development use."
