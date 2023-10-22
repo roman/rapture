@@ -1,0 +1,27 @@
+#+title: Rapture
+
+#+CAPTION:
+#+NAME:
+[[./docs/rapture.gif]]
+
+rapture is how I named my configuration for the [[https://github.com/doomemacs/doomemacs][doomemacs]] editor.
+
+** What this repository offers
+
+This repository provides a [[https://nixos.wiki/wiki/Flakes][nix flake]] that offers:
+
+- My [[file:src/config.org::*About Doom.d Configuration][doomemacs configuration]]
+
+- A nix [[file:default.nix::inputs: { lib, rsync, stdenv, emacs, coreutils }:][derivation]] that provides the doom.d file contents
+
+- A [[file:nix/packages/lsp-grammarly/default.nix::inputs: { emacsPackages, nodejs_16 }:][derivation]] that overrides the [[https://github.com/emacs-grammarly/lsp-grammarly][lsp-grammarly]] default to use the
+  [[grammarly-languageserver][grammarly-languageserver]] installed by Nix.
+
+- A [[https://github.com/nix-community/home-manager#home-manager-using-nix][home-manager]] [[file:nix/modules/home-manager/rapture/default.nix::{ self, ... } @ inputs: { lib, pkgs, config, ... }:][module]] that, when enabled, installs doomemacs with my
+  configuration embedded. Note you *must* have [[https://github.com/nix-community/nix-doom-emacs][nix-doom-emacs]] installed as well
+  for this to work.
+
+** Usage example
+
+In the =example= folder, you'll find an [[file:example/flake.nix::{][flake.nix]] file that contains the
+necessary code to use this project.
