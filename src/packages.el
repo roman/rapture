@@ -9,16 +9,13 @@
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;(package! some-package)
 
-(package! annalist)
-(package! plantuml-mode :pin "b39c310e9cb5a2e7aa72d143348362307d561f88")
-(package! jsonnet-mode :pin "54a89b0aaba7a68782008c5e1ab00d5ec757316a")
-(package! protobuf-mode :pin "1ab7789f384472b84872a885d998a7a7ef411acc")
-(package! rainbow-mode :pin "a8a8e2007148e3ab6d8bd332988d52e46fdc6657")
-(package! undo-tree
-  :recipe (:host gitlab
-           :repo "tsc25/undo-tree"))
-(package! golden-ratio
-  :pin "007911d8a431b72670f5fe5f0e5b4380c2777a31")
+(package! annalist :built-in 'prefer)
+(package! plantuml-mode :built-in 'prefer)
+(package! jsonnet-mode :built-in 'prefer)
+(package! protobuf-mode :built-in 'prefer)
+(package! rainbow-mode :built-in 'prefer)
+(package! undo-tree :built-in 'prefer)
+(package! golden-ratio :built-in 'prefer)
 (package! lsp-grammarly :built-in 'prefer)
 
 ;; To install a package directly from a remote git repo, you must specify a
