@@ -342,6 +342,7 @@ doesn't manifest as much.
 
 (use-package! lsp-grammarly
   :hook ((text-mode . lsp-mode)
+         (gfm-mode . lsp-mode)
          (markdown-mode . lsp-mode)
          (org-mode . lsp-mode))
   )
