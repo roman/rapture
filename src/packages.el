@@ -17,6 +17,7 @@
 (package! undo-tree :built-in 'prefer)
 (package! golden-ratio :built-in 'prefer)
 (package! lsp-grammarly :built-in 'prefer)
+(package! gptel :built-in 'prefer)
 
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:

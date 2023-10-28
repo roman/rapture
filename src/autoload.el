@@ -438,3 +438,26 @@ the current layouts buffers."
   (if (zoo/org-is-last-task-started-p)
       (org-clock-in-last)
     (message "ignoring org-clock-in-last")))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; GPT Utilities
+
+;;;###autoload
+(defvar zoo-chatgpt-key nil)
+
+;;;###autoload
+(defun +zoo/gather-chatgpt-api-key ()
+  "Gathers the OpenAI API key secret from my personal configuration"
+  (interactive)
+  (when (not zoo-chatgpt-key)
+    (let ((token-file (format "%s/.secrets/decrypted/chatgpt.key"
+                              (getenv "HOME"))))
+      (message (format "token-file: %s; present: %s" token-file (file-exists-p token-file)))
+      (when (not (file-exists-p token-file))
+        (error "Need to configure credentials on decrypted directory"))
+
+      (with-temp-buffer
+        (insert-file-contents token-file)
+        (setq zoo-chatgpt-key (buffer-string)))))
+  zoo-chatgpt-key)

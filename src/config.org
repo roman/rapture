@@ -347,3 +347,14 @@ doesn't manifest as much.
          (org-mode . lsp-mode))
   )
 #+end_src
+
+* ChatGPT integration
+
+I want to be able to run chatGPT from my emacs editor to receive help on code
+completion and general inquiries.
+
+#+begin_src emacs-lisp
+(use-package! gptel
+  :config
+  (setq! gptel-api-key '+zoo/gather-chatgpt-api-key))
+#+end_src
