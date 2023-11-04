@@ -361,6 +361,74 @@ the current layouts buffers."
 ;; Org utilities
 
 ;;;###autoload
+(defun zoo/find-previous-daily-file ()
+  "Find the most recent existing .org file in the format
+'YYYY-MM-DD.org' before today's date."
+  (let ((dir-path (expand-file-name org-roam-dailies-directory org-roam-directory))
+        (current-date (time-subtract (current-time) (days-to-time 1))) ; Start from yesterday
+        (found nil)
+        (file-path nil))
+    (while (not found)
+      ;; Format the date to match the file name
+      (setq file-path (expand-file-name (format-time-string "%Y-%m-%d.org" current-date) dir-path))
+      ;; Check if the file exists
+      (if (file-exists-p file-path)
+          (setq found t)  ; Found the file, exit the loop
+        ;; Subtract one day and continue looping
+        (setq current-date (time-subtract current-date (days-to-time 1)))))
+    (if found
+        file-path
+      (message "No file found in the given directory before today's date"))))
+
+;;;###autoload
+(defun zoo/get-previous-daily-things-to-do ()
+  (let ((last-daily-file (zoo/find-previous-daily-file)))
+    (with-temp-buffer
+      (org-mode)
+      (insert-file-contents last-daily-file)
+      (goto-char (point-min))
+      (org-next-visible-heading 1)
+      (let ((prev-pos 1)
+            (found nil)
+            (subtree-contents nil))
+        (while (not found)
+          (if (= prev-pos (point))
+              (setq found t)
+            ;; else
+            (let ((heading (org-get-heading)))
+              (if (and heading (string= heading "Things to do"))
+                  (progn
+                    (setq found t)
+                    (save-restriction
+                      (org-narrow-to-subtree)
+                      (setq subtree-contents
+                            (buffer-substring-no-properties
+                             (point-min)
+                             (point-max)))))
+                ;; else
+                (progn
+                  (setq prev-pos (point))
+                  (org-forward-heading-same-level 1))))))
+        subtree-contents))))
+
+;;;###autoload
+(defun zoo/org-roam-daily-template ()
+  (let ((things-to-do (zoo/get-previous-daily-things-to-do)))
+    (string-join
+     (append
+      (list "")
+      (string-split things-to-do "\n")
+      (list
+       "* Pomodori"
+       "** one"
+       ""
+       "* Report"
+       "** do/next"
+       "** next"
+       "** support/help"))
+     "\n")))
+
+;;;###autoload
 (defun zoo/org-current-timestamp ()
   (let ((fmt (concat
               "<" (cdr org-time-stamp-formats) ">")))
