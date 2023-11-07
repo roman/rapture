@@ -7,6 +7,7 @@ stdenv.mkDerivation {
 
   buildInputs = [ emacs coreutils ];
   buildPhase = ''
+    echo "GENERATING config.el FROM config.org"
     cp -R $src/* .
     # tangle org files
     emacs --batch -Q -l org \

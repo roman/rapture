@@ -158,6 +158,8 @@ The change below accomplishes this setup:
 * Org Mode
 ** Org Roam
 
+*** Initialize
+
 [[https://www.orgroam.com/][org-roam]] gives super-powers to the vanilla =org-mode= experience. It does DB
 indexing, daily note management, and graph search. Pure <3.
 
@@ -165,6 +167,32 @@ indexing, daily note management, and graph search. Pure <3.
 (after! org-roam
   (setq org-roam-directory "~/Projects/notes"))
 #+end_src
+
+*** Capture Template override
+
+I want to get a daily template where an established format is defined, the format involves
+
+- Things to do -- This section is a brainstorm of tasks. I want this list to be
+  a copy/paste from the previous filled day
+
+- Pomodori -- Entries where I organize what to do next following the Pomodoro
+  method
+
+- Report -- I want this entry to always contain 3 items (do/learn, next,
+  support/help) that I want to share over slack by EOD
+
+#+begin_src emacs-lisp
+(after! org-roam
+  (setq org-roam-dailies-capture-templates
+      '(
+        ;; Old value; kept for reference
+        ;; ("d" "default" entry "* %?"
+        ;;  :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))
+
+        ("d" "default" plain "%?"
+         :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n%(zoo/org-roam-daily-template)")))))
+#+end_src
+
 
 ** Enhancements to the default configuration
 
@@ -342,7 +370,19 @@ doesn't manifest as much.
 
 (use-package! lsp-grammarly
   :hook ((text-mode . lsp-mode)
+         (gfm-mode . lsp-mode)
          (markdown-mode . lsp-mode)
          (org-mode . lsp-mode))
   )
+#+end_src
+
+* ChatGPT integration
+
+I want to be able to run chatGPT from my emacs editor to receive help on code
+completion and general inquiries.
+
+#+begin_src emacs-lisp
+(use-package! gptel
+  :config
+  (setq! gptel-api-key '+zoo/gather-chatgpt-api-key))
 #+end_src

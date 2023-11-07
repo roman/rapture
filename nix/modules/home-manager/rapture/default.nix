@@ -28,6 +28,20 @@ let
     # override the lsp-grammarly package to have a direct link to the
     # grammarly-languageserver nix installation
     lsp-grammarly = self.packages.${pkgs.system}.lsp-grammarly;
+
+    inherit (pkgs.emacsPackages)
+      evil-collection
+
+      annalist
+      plantuml-mode
+      jsonnet-mode
+      protobuf-mode
+      rainbow-mode
+      undo-tree
+      golden-ratio
+      gptel
+
+      org-roam;
   };
 
   cfg = config.rapture;
