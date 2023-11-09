@@ -423,7 +423,7 @@ the current layouts buffers."
        "** one"
        ""
        "* Report"
-       "** do/next"
+       "** do/learn"
        "** next"
        "** support/help"))
      "\n")))
