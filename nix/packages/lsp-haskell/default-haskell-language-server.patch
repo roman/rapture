@@ -1,0 +1,13 @@
+diff --git a/lsp-haskell.el b/lsp-haskell.el
+index ef425ee..8e0d0a6 100644
+--- a/lsp-haskell.el
++++ b/lsp-haskell.el
+@@ -427,7 +427,7 @@ but will take exponentially more time."
+ ;; Non-language server options
+ 
+ (defcustom lsp-haskell-server-path
+-  "haskell-language-server-wrapper"
++  "@haskell-language-server@"
+   "The language server executable.
+ Can be something on the $PATH (e.g. 'ghcide') or a path to an executable itself."
+   :group 'lsp-haskell

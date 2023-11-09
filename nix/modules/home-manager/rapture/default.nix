@@ -28,6 +28,7 @@ let
     # override the lsp-grammarly package to have a direct link to the
     # grammarly-languageserver nix installation
     lsp-grammarly = self.packages.${pkgs.system}.lsp-grammarly;
+    lsp-haskell = self.packages.${pkgs.system}.lsp-haskell;
 
     inherit (pkgs.emacsPackages)
       evil-collection
