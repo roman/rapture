@@ -13,11 +13,13 @@
     emacs-overlay.url = "github:nix-community/emacs-overlay";
   };
 
-  outputs = { nixpkgs, nixDir, ... } @ inputs:
+  outputs = { nixDir, ... } @ inputs:
     nixDir.lib.buildFlake {
       inherit inputs;
       systems = [ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" ];
       root = ./.;
+
+      injectOverlays = [ "emacsOverlay" ];
 
       nixpkgsConfig = {
         # I have to run grammarly-language-server with nodejs16 for it to work
