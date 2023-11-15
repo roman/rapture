@@ -1,9 +1,16 @@
 {
+
+  nixConfig = {
+    extra-substituters = "https://nix-community.cachix.org";
+    extra-trusted-public-keys = "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=";
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
     # nixDir.url = "github:roman/nixDir/v2";
     nixDir.url = "git+file:///Users/rgonzalez/Projects/nixDir";
     flake-utils.url = "github:numtide/flake-utils";
+    emacs-overlay.url = "github:nix-community/emacs-overlay";
   };
 
   outputs = { nixpkgs, nixDir, ... } @ inputs:
