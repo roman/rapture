@@ -27,11 +27,12 @@ let
   emacsPackagesOverlay = final: prev: {
     # override the lsp-grammarly package to have a direct link to the
     # grammarly-languageserver nix installation
-    lsp-grammarly = self.packages.${pkgs.system}.lsp-grammarly;
+    # lsp-grammarly = self.packages.${pkgs.system}.lsp-grammarly;
     lsp-haskell = self.packages.${pkgs.system}.lsp-haskell;
 
     inherit (pkgs.emacsPackages)
       evil-collection
+      lsp-mode
 
       annalist
       plantuml-mode
@@ -41,6 +42,7 @@ let
       undo-tree
       golden-ratio
       gptel
+      git-link
 
       org-roam;
   };
