@@ -1,0 +1,642 @@
+* Introduction
+
+After transition from vanilla emacs to [[https://www.spacemacs.org/][spacemacs]] and then to
+[[https://github.com/doomemacs/doomemacs][doom-emacs]] for the past decade, I've come to the conclusion that I
+want to get back to vanilla emacs with my own custom setup. Following
+are a few reasons why I'm doing this:
+
+1) spacemacs and doom-emacs have a lot of bagghose editor configurations offer.
+
+2) reproducibility is a pain -- I've grown accustomed to [[https://nixos.org/][Nix]] and
+   reproducibility. I was using [[https://github.com/nix-ix-doom-emacs][nix-doom-emacs]] project for a while,
+   but it stopped working.
+
+3) Depedency management in emacs has gotten so much better -- Thank
+   you =use-package=.
+
+4) I like to tinker in my configuration -- exploring packages and
+   trying new things out is my jam. I don't like including layers that
+   are highly opinionated.
+
+* Evil
+** Basics
+
+I'm a vimmer deep down, make emacs bearable.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package evil
+      :defines (evil-want-keybinding)
+      :functions (evil-mode evil-define-key evil-define-key*)
+      :init
+      (setq evil-want-keybinding nil)
+      :config
+      (evil-mode)
+      (evil-define-key 'motion 'global "j" #'evil-next-visual-line)
+      (evil-define-key 'motion 'global "k" #'evil-previous-visual-line)
+      (evil-define-key 'normal 'global (kbd "SPC f f") #'find-file)
+      (evil-define-key 'normal 'global (kbd "SPC f s") #'save-buffer)
+      (evil-define-key 'normal 'global (kbd "SPC b b") #'switch-to-buffer)
+      (evil-define-key 'normal 'global (kbd "SPC b d") #'kill-buffer)
+      :custom
+      (inhibit-startup-screen t))
+#+END_SRC
+
+** Evil is everywhere
+
+Have evil keybindings in as many modes as possible
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package evil-collection
+  :functions (evil-collection-init)
+  :after (evil)
+  :config
+  (evil-collection-init))
+#+END_SRC
+
+** Escape with jq
+
+I want =jq= to get me to normal mode
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package key-chord
+  :functions (key-chord-define key-chord-mode)
+  :after (evil)
+  :config
+  (key-chord-define evil-insert-state-map "jk" 'evil-normal-state)
+  (key-chord-mode 1)
+  :custom
+  (setq key-chord-two-keys-delay 0.5))
+#+END_SRC
+
+** Multiple edit support
+
+Edit multiple entries at the same time
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package iedit)
+
+(use-package evil-multiedit
+  :functions (evil-multiedit-default-keybinds)
+  :after (evil iedit)
+  :config
+  (evil-multiedit-default-keybinds))
+#+END_SRC
+
+* Basics
+** Package Management
+
+The only way to install packages is through the Nix package
+manager. The configuration bellow ensures that =use-package= doesn't
+install dependencies at runtime.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(require 'use-package)
+
+(setq package-enable-at-startup nil)
+(setq use-package-ensure-function 'ignore)
+(setq package-archives nil)
+#+END_SRC
+
+** Fancy Splash Window
+
+I want a fancy splash window. This code assumes there is an
+environment variable =SPLASH_IMG_PATH= that contains the path for the
+splash image.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq initial-scratch-message nil)
+  (setq inhibit-startup-screen t)
+
+  (defun ar/show-welcome-buffer ()
+    "Show *Welcome* buffer."
+    (with-current-buffer (get-buffer-create "*Welcome*")
+      (setq truncate-lines t)
+      (let* ((buffer-read-only)
+	     ;; I'm relying on the nix setup to include this SPLASH_IMG_PATH
+	     (image-path (getenv "SPLASH_IMG_PATH"))
+	     (image (create-image image-path))
+	     (size (image-size image))
+	     (height (cdr size))
+	     (width (car size))
+	     (top-margin (floor (/ (- (window-height) height) 2)))
+	     (left-margin (floor (/ (- (window-width) width) 2)))
+	     (prompt-title "Welcome to Emacs!"))
+	(erase-buffer)
+	(setq mode-line-format nil)
+	(goto-char (point-min))
+	(insert (make-string top-margin ?\n ))
+	(insert (make-string left-margin ?\ ))
+	(insert-image image)
+	(insert "\n\n\n")
+	(insert (make-string (floor (/ (- (window-width) (string-width prompt-title)) 2)) ?\ ))
+	(insert prompt-title))
+      (setq cursor-type nil)
+      (read-only-mode +1)
+      (switch-to-buffer (current-buffer))
+      ;; (local-set-key (kbd "q") 'kill-this-buffer)
+      (evil-local-set-key 'normal (kbd "q") #'kill-this-buffer)
+      (evil-local-set-key 'insert (kbd "q") #'kill-this-buffer)))
+
+  (when (< (length command-line-args) 2)
+    (add-hook 'emacs-startup-hook (lambda ()
+				    (when (display-graphic-p)
+				      (ar/show-welcome-buffer)))))
+#+END_SRC
+
+** Recent files
+
+Enable recentf-mode because I always want to be able to access recent files
+
+#+begin_src emacs-lisp :tangle yes
+  (recentf-mode 1)
+  (setq recentf-max-menu-items 50)
+  (setq recentf-max-saved-items 1000)
+#+end_src
+
+** Terminal
+
+Use =vterm= to run terminals in emacs
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package multi-vterm
+    :config
+    (evil-define-key 'normal 'global (kbd "SPC o t") 'multi-vterm)
+    (setq multi-vterm-dedicated-window-height-percent 30))
+#+end_src
+
+** Git Support
+
+The powerful =git= support
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package magit
+    :config
+    (evil-define-key 'normal 'global (kbd "SPC g g") 'magit))
+#+end_src
+
+* UI
+** Fonts
+
+Use [[https://github.com/tonsky/FiraCode?tab=readme-ov-file#whats-in-the-box][FiraCode]] as the font for the editor
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(set-frame-font "FiraCode Nerd Font 18" nil t)
+#+END_SRC
+
+** Ligatures
+
+I want pretty symbols on my code
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package ligature
+    :config
+    ;; Enable the "www" ligature in every possible major mode
+    (ligature-set-ligatures 't '("www"))
+    ;; Enable traditional ligature support in eww-mode, if the
+    ;; `variable-pitch' face supports it
+    (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
+    ;; Enable all Cascadia and Fira Code ligatures in programming modes
+    (ligature-set-ligatures 'prog-mode
+			  '(;; == === ==== => =| =>>=>=|=>==>> ==< =/=//=// =~
+			    ;; =:= =!=
+			    ("=" (rx (+ (or ">" "<" "|" "/" "~" ":" "!" "="))))
+			    ;; ;; ;;;
+			    (";" (rx (+ ";")))
+			    ;; && &&&
+			    ("&" (rx (+ "&")))
+			    ;; !! !!! !. !: !!. != !== !~
+			    ("!" (rx (+ (or "=" "!" "\." ":" "~"))))
+			    ;; ?? ??? ?:  ?=  ?.
+			    ("?" (rx (or ":" "=" "\." (+ "?"))))
+			    ;; %% %%%
+			    ("%" (rx (+ "%")))
+			    ;; |> ||> |||> ||||> |] |} || ||| |-> ||-||
+			    ;; |->>-||-<<-| |- |== ||=||
+			    ;; |==>>==<<==<=>==//==/=!==:===>
+			    ("|" (rx (+ (or ">" "<" "|" "/" ":" "!" "}" "\]"
+					    "-" "=" ))))
+			    ;; \\ \\\ \/
+			    ("\\" (rx (or "/" (+ "\\"))))
+			    ;; ++ +++ ++++ +>
+			    ("+" (rx (or ">" (+ "+"))))
+			    ;; :: ::: :::: :> :< := :// ::=
+			    (":" (rx (or ">" "<" "=" "//" ":=" (+ ":"))))
+			    ;; // /// //// /\ /* /> /===:===!=//===>>==>==/
+			    ("/" (rx (+ (or ">"  "<" "|" "/" "\\" "\*" ":" "!"
+					    "="))))
+			    ;; .. ... .... .= .- .? ..= ..<
+			    ("\." (rx (or "=" "-" "\?" "\.=" "\.<" (+ "\."))))
+			    ;; -- --- ---- -~ -> ->> -| -|->-->>->--<<-|
+			    ("-" (rx (+ (or ">" "<" "|" "~" "-"))))
+			    ;; *> */ *)  ** *** ****
+			    ("*" (rx (or ">" "/" ")" (+ "*"))))
+			    ;; www wwww
+			    ("w" (rx (+ "w")))
+			    ;; <> <!-- <|> <: <~ <~> <~~ <+ <* <$ </  <+> <*>
+			    ;; <$> </> <|  <||  <||| <|||| <- <-| <-<<-|-> <->>
+			    ;; <<-> <= <=> <<==<<==>=|=>==/==//=!==:=>
+			    ;; << <<< <<<<
+			    ("<" (rx (+ (or "\+" "\*" "\$" "<" ">" ":" "~"  "!"
+					    "-"  "/" "|" "="))))
+			    ;; >: >- >>- >--|-> >>-|-> >= >== >>== >=|=:=>>
+			    ;; >> >>> >>>>
+			    (">" (rx (+ (or ">" "<" "|" "/" ":" "=" "-"))))
+			    ;; #: #= #! #( #? #[ #{ #_ #_( ## ### #####
+			    ("#" (rx (or ":" "=" "!" "(" "\?" "\[" "{" "_(" "_"
+					 (+ "#"))))
+			    ;; ~~ ~~~ ~=  ~-  ~@ ~> ~~>
+			    ("~" (rx (or ">" "=" "-" "@" "~>" (+ "~"))))
+			    ;; __ ___ ____ _|_ __|____|_
+			    ("_" (rx (+ (or "_" "|"))))
+			    ;; Fira code: 0xFF 0x12
+			    ("0" (rx (and "x" (+ (in "A-F" "a-f" "0-9")))))
+			    ;; Fira code:
+			    "Fl"  "Tl"  "fi"  "fj"  "fl"  "ft"
+			    ;; The few not covered by the regexps.
+			    "{|"  "[|"  "]#"  "(*"  "}#"  "$>"  "^="))
+    ;; Enables ligature checks globally in all buffers. You can also do it
+    ;; per mode with `ligature-mode'.
+    (global-ligature-mode t))
+#+END_SRC
+
+** Window Frame
+
+Remove ugly top frame from the macOS UI
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq ns-auto-hide-menu-bar t)
+  ;; (set-frame-position nil 0 -24)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  (menu-bar-mode -1)
+#+END_SRC
+
+Enable both transparent title bar as well as dark appearance, giving a
+minimal window decoration.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+(add-to-list 'default-frame-alist '(ns-appearance . dark))
+#+END_SRC
+
+** Modeline
+
+Leverage [[https://github.com/seagle0128/doom-modeline][doom-emacs modeline]].
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package doom-modeline
+    :after (evil winum)
+    :hook (after-init . doom-modeline-mode)
+    :config
+    (setq doom-modeline-always-show-macro-register t)
+    (setq doom-modeline-modal-modern-icon nil))
+#+END_SRC
+
+Also nyan-cat on the modeline
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package nyan-mode
+  :defines (nyan-bar-length)
+  :functions (nyan-mode)
+  :if (display-graphic-p)
+  :custom
+  (setq-default nyan-bar-length 10)
+  :config
+  (nyan-mode +1))
+#+END_SRC
+
+** Golden Ratio
+
+I developed [[https://github.com/roman/golden-ratio.el][golden-ratio]], naturally I'm going to use it.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package golden-ratio
+    :defines (golden-ratio-auto-scale)
+    :functions (golden-ratio-mode)
+    :after (evil winum)
+    :config
+    (setq golden-ratio-auto-scale t)
+    :config
+    (golden-ratio-mode)
+    (defadvice evil-window-right
+       (after golden-ratio-resize-window)
+       (golden-ratio) 
+       nil)
+    (defadvice evil-window-left
+      (after golden-ratio-resize-window)
+       (golden-ratio) 
+       nil)
+    (defadvice evil-window-up
+      (after golden-ratio-resize-window)
+       (golden-ratio) 
+       nil)
+    (defadvice evil-window-down
+      (after golden-ratio-resize-window)
+       (golden-ratio) 
+       nil)
+    (defadvice winum-select-window-by-number
+	(after golden-ratio-resize-window)
+      (golden-ratio) 
+      nil)
+    (ad-activate 'evil-window-up)
+    (ad-activate 'evil-window-down)
+    (ad-activate 'evil-window-left)
+    (ad-activate 'evil-window-right)
+    (ad-activate 'winum-select-window-by-number))
+#+end_src
+
+** Minibuffer
+
+Use vertico as the minibuffer utility
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package vertico
+    :config
+    (vertico-mode))
+#+END_SRC
+
+Use marginalia to get descriptions in the minibuffer
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package marginalia
+    :config
+    (marginalia-mode))
+#+END_SRC
+
+** Search Utilities (consult)
+
+Use embark to export consult searches and modify multiple files at once
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package wgrep)
+
+  (use-package embark
+    :after (wgrep)
+    :init
+    (setq prefix-help-command #'embark-prefix-help-command)
+
+    (defun +embark/export-write ()
+      "Export the current vertico results to a writable buffer if possible.
+       Supports exporting consult-grep to wgrep, file to wdeired, and consult-location to occur-edit"
+      (interactive)
+      (require 'embark)
+      (let* ((edit-command
+	      (pcase-let ((`(,type . ,candidates)
+			   (run-hook-with-args-until-success 'embark-candidate-collectors)))
+		(pcase type
+		  ('consult-grep #'wgrep-change-to-wgrep-mode)
+		  ('file #'wdired-change-to-wdired-mode)
+		  ('consult-location #'occur-edit-mode)
+		  (x (user-error "embark category %S doesn't support writable export" x)))))
+	     (embark-after-export-hook `(,@embark-after-export-hook ,edit-command)))
+	(embark-export)))
+
+    :bind
+    (:map minibuffer-mode-map
+	  ("C-c C-e" . +embark/export-write)
+	  ("C-c C-;" . embark-export)
+	  ("C-c C-l" . embark-collect))
+    :config
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+		 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+		   nil
+		   (window-parameters (mode-line-format . none)))))
+#+END_SRC
+
+Use consult to perform searches across multiple APIs
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package consult
+    :after (evil projectile)
+    :init
+    (defun dw/get-project-root ()
+      (when (fboundp 'projectile-project-root)
+	(projectile-project-root)))
+    :config
+    (evil-define-key 'normal 'recentf-mode-map (kbd "SPC f r") #'consult-recent-file)
+    (evil-define-key 'normal 'global (kbd "SPC s s") #'consult-line)
+    (evil-define-key 'normal 'global (kbd "SPC s i") #'consult-imenu)
+    (evil-define-key 'normal
+      'projectile-mode-map (kbd "SPC p p") #'consult-ripgrep)
+    (evil-define-key 'normal
+      'org-mode-map (kbd "SPC s i") #'consult-org-heading)
+    :custom
+    (consult-project-root-function #'dw/get-project-root)
+    (complete-in-region-function #'consult-completion-in-region))
+#+END_SRC
+
+Integrate both consult and embark
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package embark-consult
+  :after (consult embark)
+  :hook (embark-collect-mode . consult-preview-at-point-mode))
+#+END_SRC
+
+Use [[https://github.com/minad/consult-flycheck][consult-flycheck]] to search flycheck information
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package consult-flycheck
+    :after (evil consult flycheck)
+    :config
+    (evil-define-key 'normal
+      'flycheck-mode-map (kbd "SPC e e") 'consult-flycheck))
+#+END_SRC
+
+Use [[https://github.com/oantolin/orderless][orderless]] to have easy to search terms
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package orderless
+    :init (icomplete-mode)
+    :custom (completion-styles '(orderless)))
+#+END_SRC
+
+** Themes
+*** doom-emacs
+Leverage [[https://github.com/doomemacs/themes?tab=readme-ov-file#manually--use-package][doom-emacs themes]].
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package doom-themes
+    :defines (doom-themes-enable-bold doom-themes-enable-italic)
+    :functions (doom-themes-visual-bell-config doom-themes-org-config)
+    :config
+    (setq doom-themes-enable-bold t
+	  doom-themes-enable-italic t)
+    ;; (load-theme 'wombat t)
+    (doom-themes-visual-bell-config)
+    (doom-themes-org-config))
+#+END_SRC
+
+*** timu-macos-theme
+
+Experimenenting with the [[https://gitlab.com/aimebertrand/timu-macos-theme][timu-macos theme]]
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package timu-macos-theme
+    :config
+    (load-theme 'timu-macos t)
+    :custom
+    (customize-set-variable 'timu-macos-org-intense-colors t)
+    (customize-set-variable 'timu-macos-flavour "dark"))
+#+end_src
+
+* Navigation
+** Projectile
+
+Setup projectile utilities
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package projectile
+    :config
+    (evil-define-key 'normal
+      'projectile-mode-map (kbd "SPC p f") #'projectile-find-file))
+#+end_src
+
+** Window Navigation
+
+Allow selection of windows using =M-number=
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package winum
+    :functions (winum-mode)
+    :config
+    (winum-mode)
+    (global-set-key (kbd "M-1") 'winum-select-window-1)
+    (global-set-key (kbd "M-2") 'winum-select-window-2)
+    (global-set-key (kbd "M-3") 'winum-select-window-3)
+    (global-set-key (kbd "M-4") 'winum-select-window-4)
+    (global-set-key (kbd "M-5") 'winum-select-window-5))
+#+END_SRC
+** Goto letter Navigation
+
+Go to an specific letter easily.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package avy
+      :after (evil)
+      :config
+      (evil-define-key 'normal 'global (kbd "SPC SPC") #'avy-goto-char))
+#+END_SRC
+
+* Help
+** Hints for command completion
+
+Help me complete commands when I partially start writing them
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package which-key
+  :defines (which-key-replacement-alist)
+  :functions (which-key-mode which-key-setup-side-window-bottom)
+  :custom
+  (setq which-key-sort-order #'which-key-key-order-alpha
+        which-key-sort-uppercase-first nil
+        which-key-add-column-padding 1
+        which-key-max-display-columns nil
+        which-key-min-display-lines 6
+        which-key-side-window-slot -10)
+  :config
+  (put 'which-key-replacement-alist 
+       'initial-value 
+        which-key-replacement-alist)
+  ;; readability improvements 
+  (which-key-setup-side-window-bottom)
+  (which-key-mode))
+#+END_SRC
+
+** Better help UI
+
+Add helpful to have more readable text when reading emacs
+documentation.  I'm binding creating new binds as suggested by their
+[[https://github.com/Wilfred/helpful?tab=readme-ov-file#usage][README]].
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package helpful
+    :functions (helpful-callable helpful-variable helpful-key helpful-command helpful-at-point helpful-function)
+    :config
+    (global-set-key (kbd "C-h f") #'helpful-callable)
+    (global-set-key (kbd "C-h v") #'helpful-variable)
+    (global-set-key (kbd "C-h k") #'helpful-key)
+    (global-set-key (kbd "C-h x") #'helpful-command)
+    (global-set-key (kbd "C-c C-d") #'helpful-at-point)
+    (global-set-key (kbd "C-h F") #'helpful-function))
+#+END_SRC
+
+** Command observability
+
+Allow me to see what keybindings/commands I'm using
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package command-log-mode
+    :after (evil)
+    :config
+
+    (defun rg/toggle-command-log-mode ()
+      (interactive)
+      (if (clm/toggle-command-log-buffer)
+	  (command-log-mode)
+	;; else
+	(command-log-mode -1)))
+
+    (evil-define-key 'normal 'global (kbd "SPC t c")
+      #'rg/toggle-command-log-mode))
+#+END_SRC
+
+* Coding
+** LSP
+
+Use =company= to make lsp-mode happy
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package company)
+#+END_SRC
+
+Add support for the Language Server Protocol APIs
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package lsp-mode
+    :after (evil)
+    :hook ((lsp-mode . company-mode)
+	   (lsp-mode . display-line-numbers-mode)
+	   (after-save . lsp-format-buffer))
+    :config
+    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c d") #'lsp-find-definition)
+    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c r") #'lsp-rename)
+    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c f") #'lsp-format-buffer)
+    :custom
+    (lsp-enable-snippet nil))
+#+END_SRC
+
+Add support for fancy lsp UI
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package lsp-ui
+    :after (lsp-mode)
+    :hook (lsp-mode . lsp-ui-mode)
+    :config
+    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c i") #'lsp-ui-imenu))
+#+END_SRC
+
+** Languages
+*** Nix
+
+Add nix support
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package nix-mode
+    ;; :after (lsp-mode)
+    :mode "\\.nix"
+    :hook (nix-mode . lsp-deferred)
+    :config
+    :custom
+    (lsp-nix-nil-formatter ["nixpkgs-fmt"]))
+#+END_SRC
+
+*** Golang
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package go-mode 
+    :mode "\\.go" 
+    :hook (go-mode . lsp-deferred))
+#+END_SRC
