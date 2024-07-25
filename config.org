@@ -167,7 +167,8 @@ Use =vterm= to run terminals in emacs
 #+begin_src emacs-lisp :tangle yes
   (use-package multi-vterm
     :config
-    (evil-define-key 'normal 'global (kbd "SPC o t") 'multi-vterm)
+    (evil-define-key 'normal 'global (kbd "SPC o T") 'multi-vterm)
+    (evil-define-key 'normal 'global (kbd "SPC o t") 'multi-vterm-project)
     (setq multi-vterm-dedicated-window-height-percent 30))
 #+end_src
 
