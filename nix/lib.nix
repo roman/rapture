@@ -17,9 +17,11 @@
 
       runtimeDeps = builtins.attrValues {
         inherit (pkgs)
-          ripgrep gcc gitMinimal
+          ripgrep gcc gitMinimal;
+
+        inherit (self.packages.${pkgs.system})
           # nix development
-          statix nixpkgs-fmt nil;
+          nixlang;
       };
 
       emacsSplash = builtins.fetchurl {
