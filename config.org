@@ -335,7 +335,6 @@ I developed [[https://github.com/roman/golden-ratio.el][golden-ratio]], naturall
     :after (evil winum)
     :config
     (setq golden-ratio-auto-scale t)
-    :config
     (golden-ratio-mode)
     (defadvice evil-window-right
        (after golden-ratio-resize-window)
