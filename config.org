@@ -696,7 +696,6 @@ Add nix support
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package nix-mode
-    ;; :after (lsp-mode)
     :mode "\\.nix"
     :hook (nix-mode . lsp-deferred)
     :config
