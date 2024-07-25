@@ -24,21 +24,22 @@ are a few reasons why I'm doing this:
 I'm a vimmer deep down, make emacs bearable.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-    (use-package evil
-      :defines (evil-want-keybinding)
-      :functions (evil-mode evil-define-key evil-define-key*)
-      :init
-      (setq evil-want-keybinding nil)
-      :config
-      (evil-mode)
-      (evil-define-key 'motion 'global "j" #'evil-next-visual-line)
-      (evil-define-key 'motion 'global "k" #'evil-previous-visual-line)
-      (evil-define-key 'normal 'global (kbd "SPC f f") #'find-file)
-      (evil-define-key 'normal 'global (kbd "SPC f s") #'save-buffer)
-      (evil-define-key 'normal 'global (kbd "SPC b b") #'switch-to-buffer)
-      (evil-define-key 'normal 'global (kbd "SPC b d") #'kill-buffer)
-      :custom
-      (inhibit-startup-screen t))
+  (use-package evil
+    :defines (evil-want-keybinding)
+    :functions (evil-mode evil-define-key evil-define-key*)
+    :init
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-mode)
+    (evil-define-key 'motion 'global "j" #'evil-next-visual-line)
+    (evil-define-key 'motion 'global "k" #'evil-previous-visual-line)
+    (evil-define-key 'normal 'global (kbd "SPC f f") #'find-file)
+    (evil-define-key 'normal 'global (kbd "SPC f s") #'save-buffer)
+    (evil-define-key 'normal 'global (kbd "SPC b b") #'switch-to-buffer)
+    (evil-define-key 'normal 'global (kbd "SPC b d") #'kill-buffer)
+    :custom
+    (inhibit-startup-screen t))
+
 #+END_SRC
 
 ** Evil is everywhere
@@ -285,12 +286,12 @@ minimal window decoration.
 Leverage [[https://github.com/seagle0128/doom-modeline][doom-emacs modeline]].
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package doom-modeline
-    :after (evil winum)
-    :hook (after-init . doom-modeline-mode)
-    :config
-    (setq doom-modeline-always-show-macro-register t)
-    (setq doom-modeline-modal-modern-icon nil))
+    (use-package doom-modeline
+      :after (evil winum)
+      :hook (after-init . doom-modeline-mode)
+      :config
+      (setq doom-modeline-always-show-macro-register t)
+      (setq doom-modeline-modal-modern-icon nil))
 #+END_SRC
 
 Also nyan-cat on the modeline
