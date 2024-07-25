@@ -601,6 +601,59 @@ Allow me to see what keybindings/commands I'm using
 #+END_SRC
 
 * Coding
+** Delimiter Setup (Parenthesis, Quotes, et al)
+
+Following recommendations from [[https://www.reddit.com/r/emacs/comments/a6uepj/comment/ebysmzo/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button][this Reddit thread]].
+
+- Ensure there is autocompletion of quotes, parenthesis, etc.
+
+  #+begin_src elisp :tangle yes
+    (use-package smartparens
+      :config
+      (add-hook 'prog-mode-hook #'smartparens-mode))
+  #+end_src
+
+- Show matching parenthesis/quote/etc.
+
+  This package is already included in emacs, so no need to
+  call =use-package= on it.
+
+  #+begin_src elisp :tangle yes
+    (add-hook 'prog-mode-hook #'show-paren-mode)
+  #+end_src
+
+- [[https://github.com/emacsmirror/highlight-parentheses][highlight-parentheses]] to highlight the nested parens
+
+  #+begin_src elisp :tangle yes
+    (use-package highlight-parentheses
+      :config
+      (add-hook 'prog-mode-hook #'highlight-parentheses-mode))
+  #+end_src
+
+- Rainbow delimiters for deeply nested datastructures
+
+  #+begin_src elisp :tangle yes
+    (use-package rainbow-delimiters
+      :config
+      (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+  #+end_src
+
+- [[https://github.com/emacs-evil/evil-surround][evil-surround]] for ease of editing content inside delimiters
+
+  #+begin_src elisp :tangle yes
+    (use-package evil-surround
+      :config
+      (global-evil-surround-mode 1))
+  #+end_src
+
+- [[https://github.com/redguardtoo/evil-matchit][evil-matchit]] to have a reliable match mechanism per language
+
+  #+begin_src elisp :tangle yes
+    (use-package evil-matchit
+      :config
+      (global-evil-matchit-mode 1))
+  #+end_src
+
 ** LSP
 
 Use =company= to make lsp-mode happy
