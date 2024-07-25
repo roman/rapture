@@ -42,6 +42,12 @@ I'm a vimmer deep down, make emacs bearable.
 
 #+END_SRC
 
+I despise files ending in =~=, use version control for this:
+
+#+begin_src elisp :tangle yes
+  (setq make-backup-files nil)
+#+end_src
+
 ** Evil is everywhere
 
 Have evil keybindings in as many modes as possible
