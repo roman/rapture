@@ -181,6 +181,16 @@ The powerful =git= support
     (evil-define-key 'normal 'global (kbd "SPC g g") 'magit))
 #+end_src
 
+** Envrc Support
+
+Allow =PATH= environment to change depending on the buffer we are on
+
+#+begin_src elisp :tangle yes
+  (use-package envrc
+    :config
+    (envrc-global-mode 1))
+#+end_src
+
 * UI
 ** Fonts
 
