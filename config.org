@@ -672,6 +672,7 @@ Add support for the Language Server Protocol APIs
 	   (after-save . lsp-format-buffer))
     :config
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c d") #'lsp-find-definition)
+    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c D") #'lsp-find-references)
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c r") #'lsp-rename)
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c f") #'lsp-format-buffer)
     :custom
