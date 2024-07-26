@@ -166,6 +166,10 @@ Use =vterm= to run terminals in emacs
 
 #+begin_src emacs-lisp :tangle yes
   (use-package multi-vterm
+    :init
+    ;; I set the shell to a modern bash to avoid deprecated notices from
+    ;; stock bash installed on the OS (hacky, I know)
+    (setq vterm-shell "~/.nix-profile/bin/bash")
     :config
     (evil-define-key 'normal 'global (kbd "SPC o T") 'multi-vterm)
     (evil-define-key 'normal 'global (kbd "SPC o t") 'multi-vterm-project)
