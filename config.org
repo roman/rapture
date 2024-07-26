@@ -500,6 +500,8 @@ Experimenenting with the [[https://gitlab.com/aimebertrand/timu-macos-theme][tim
     :config
     (load-theme 'timu-macos t)
     :custom
+    (customize-set-variable 'timu-macos-mode-line-border-type "border")
+    (customize-set-variable 'timu-macos-mode-line-border t)
     (customize-set-variable 'timu-macos-org-intense-colors t)
     (customize-set-variable 'timu-macos-flavour "dark"))
 #+end_src
