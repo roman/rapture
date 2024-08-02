@@ -436,10 +436,15 @@ Use consult to perform searches across multiple APIs
     (defun dw/get-project-root ()
       (when (fboundp 'projectile-project-root)
 	(projectile-project-root)))
+    (defun zoo/ripgrep-dir (dir)
+      (interactive (list (read-directory-name "Directory: " default-directory)))
+      (consult-ripgrep dir))
+
     :config
     (evil-define-key 'normal 'recentf-mode-map (kbd "SPC f r") #'consult-recent-file)
     (evil-define-key 'normal 'global (kbd "SPC s s") #'consult-line)
     (evil-define-key 'normal 'global (kbd "SPC s i") #'consult-imenu)
+    (evil-define-key 'normal 'global (kbd "SPC s D") #'zoo/ripgrep-dir)
     (evil-define-key 'normal
       'projectile-mode-map (kbd "SPC p p") #'consult-ripgrep)
     (evil-define-key 'normal
