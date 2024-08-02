@@ -682,7 +682,14 @@ Add support for the Language Server Protocol APIs
     :hook ((lsp-mode . company-mode)
 	   (lsp-mode . display-line-numbers-mode)
 	   (after-save . lsp-format-buffer))
+
+    :init
+    (defun zoo/lsp-add-workspace (dir)
+      (interactive (list (read-directory-name "Directory: " default-directory)))
+      (lsp-workspace-folders-add dir))
+
     :config
+    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c p a") #'zoo/lsp-add-workspace)
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c d") #'lsp-find-definition)
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c D") #'lsp-find-references)
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c r") #'lsp-rename)
