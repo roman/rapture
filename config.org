@@ -687,6 +687,7 @@ Add support for the Language Server Protocol APIs
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c D") #'lsp-find-references)
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c r") #'lsp-rename)
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c f") #'lsp-format-buffer)
+    (setq lsp-enable-file-watchers nil)
     :custom
     (lsp-enable-snippet nil))
 #+END_SRC
