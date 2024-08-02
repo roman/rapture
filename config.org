@@ -613,6 +613,22 @@ Allow me to see what keybindings/commands I'm using
 #+END_SRC
 
 * Coding
+** Narrowing/Widen support
+
+Add keybindings for narrowing in a function, and widen from narrows.
+
+Narrowing allows me to do "update all" operations without affecting
+the rest of the file, it also hides any other bit of code that might
+be distracting.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package evil
+    :config
+    (evil-define-key 'normal 'prog-mode-hook (kbd "SPC c n f") #'narrow-to-defun)
+    (evil-define-key 'normal 'prog-mode-hook (kbd "SPC c w") #'widen))
+#+end_src
+
+
 ** Delimiter Setup (Parenthesis, Quotes, et al)
 
 Following recommendations from [[https://www.reddit.com/r/emacs/comments/a6uepj/comment/ebysmzo/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button][this Reddit thread]].
