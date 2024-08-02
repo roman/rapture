@@ -343,23 +343,23 @@ I developed [[https://github.com/roman/golden-ratio.el][golden-ratio]], naturall
     (golden-ratio-mode)
     (defadvice evil-window-right
        (after golden-ratio-resize-window)
-       (golden-ratio) 
+       (golden-ratio)
        nil)
     (defadvice evil-window-left
       (after golden-ratio-resize-window)
-       (golden-ratio) 
+       (golden-ratio)
        nil)
     (defadvice evil-window-up
       (after golden-ratio-resize-window)
-       (golden-ratio) 
+       (golden-ratio)
        nil)
     (defadvice evil-window-down
       (after golden-ratio-resize-window)
-       (golden-ratio) 
+       (golden-ratio)
        nil)
     (defadvice winum-select-window-by-number
 	(after golden-ratio-resize-window)
-      (golden-ratio) 
+      (golden-ratio)
       nil)
     (ad-activate 'evil-window-up)
     (ad-activate 'evil-window-down)
@@ -560,16 +560,16 @@ Help me complete commands when I partially start writing them
   :functions (which-key-mode which-key-setup-side-window-bottom)
   :custom
   (setq which-key-sort-order #'which-key-key-order-alpha
-        which-key-sort-uppercase-first nil
-        which-key-add-column-padding 1
-        which-key-max-display-columns nil
-        which-key-min-display-lines 6
-        which-key-side-window-slot -10)
+	which-key-sort-uppercase-first nil
+	which-key-add-column-padding 1
+	which-key-max-display-columns nil
+	which-key-min-display-lines 6
+	which-key-side-window-slot -10)
   :config
-  (put 'which-key-replacement-alist 
-       'initial-value 
-        which-key-replacement-alist)
-  ;; readability improvements 
+  (put 'which-key-replacement-alist
+       'initial-value
+	which-key-replacement-alist)
+  ;; readability improvements
   (which-key-setup-side-window-bottom)
   (which-key-mode))
 #+END_SRC
