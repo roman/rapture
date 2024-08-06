@@ -29,6 +29,12 @@ I'm a vimmer deep down, make emacs bearable.
     :functions (evil-mode evil-define-key evil-define-key*)
     :init
     (setq evil-want-keybinding nil)
+    ;; https://stackoverflow.com/a/1242366
+    (defun zoo/what-face (pos)
+      (interactive "d")
+      (let ((face (or (get-char-property (point) 'read-face-name)
+		      (get-char-property (point) 'face))))
+	(if face (message "Face: %s" face) (message "No face at %d" (point)))))
     :config
     (evil-mode)
     (evil-define-key 'motion 'global "j" #'evil-next-visual-line)
