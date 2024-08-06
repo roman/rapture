@@ -194,6 +194,29 @@ Use =vterm= to run terminals in emacs
     (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
     (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo))
 #+end_src
+
+- Easy way to link code from editor to github pages
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package git-link
+    :init
+    (defun zoo/get-link-commit ()
+      (interactive)
+      (let ((git-link-use-commit t))
+	(call-interactively 'git-link)))
+    :config
+    (add-to-list
+     'git-link-remote-alist
+     '("git.musta.ch" git-link-github))
+    (evil-define-key
+      'normal 'global (kbd "SPC g l")
+      #'git-link)
+    (add-to-list
+     'git-link-commit-remote-alist
+     '("git.musta.ch" git-link-commit-github))
+    (evil-define-key
+      'normal 'global (kbd "SPC g L")
+      #'git-link-commit))
 #+end_src
 
 ** Envrc Support
