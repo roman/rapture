@@ -331,6 +331,42 @@ code
     (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
     (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 #+end_src
+
+** Highlight Columns
+
+- Highlight indentation columns
+  #+begin_src emacs-lisp :tangle yes
+    (use-package highlight-indent-guides
+      :init
+      ;; https://emacs.stackexchange.com/a/74191
+      (defun zoo/-dump-face-attributes (face &rest props)
+	(cl-loop for prop in (or props
+				 (sort (mapcar #'car face-attribute-name-alist)
+				       (lambda (s1 s2)
+					 (string< (symbol-name s1) (symbol-name s2)))))
+		 for val = (face-attribute face prop nil t)
+		 unless (eq val 'unspecified)
+		 append (list prop val)))
+      (defun zoo/get-face-attribute (face prop)
+	(plist-get (zoo/-dump-face-attributes face prop) prop))
+
+      :config
+      ;; disable default coloring
+      (setq highlight-indent-guides-auto-enabled nil)
+      (set-face-background
+       'highlight-indent-guides-even-face
+       (zoo/get-face-attribute 'font-lock-type-face :foreground))
+
+      (set-face-background
+	'highlight-indent-guides-odd-face
+	(zoo/get-face-attribute 'font-lock-variable-name-face :foreground))
+
+      ;; ensure we are using the column style
+      (setq highlight-indent-guides-method 'column)
+      (evil-define-key
+	'normal 'prog-mode-map (kbd "SPC t i")
+	#'highlight-indent-guides-mode))
+  #+end_src
 ** Window Frame
 
 Remove ugly top frame from the macOS UI
