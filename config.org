@@ -852,8 +852,20 @@ Add nix support
 
 *** Golang
 
-#+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package go-mode 
-    :mode "\\.go" 
-    :hook (go-mode . lsp-deferred))
-#+END_SRC
+- Add golang support
+
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package go-mode
+      :mode "\\.go"
+      :hook (go-mode . lsp-deferred))
+  #+END_SRC
+
+- Add keybindings to run go unit tests from emacs
+
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package gotest
+      :after (go-mode)
+      :config
+      (evil-define-key 'normal 'go-mode-map (kbd ", t t") #'go-test-current-test)
+      (evil-define-key 'normal 'go-mode-map (kbd ", t f") #'go-test-current-file))
+  #+END_SRC
