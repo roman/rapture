@@ -367,6 +367,30 @@ code
 	'normal 'prog-mode-map (kbd "SPC t i")
 	#'highlight-indent-guides-mode))
   #+end_src
+
+- Highlight max column line
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package evil
+      :config
+      (setq fill-column 120)
+      (set-face-foreground 'fill-column-indicator "#ff6e64")
+      (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+      (evil-define-key
+	'normal 'prog-mode-map (kbd "SPC t f")
+	#'display-fill-column-indicator-mode))
+  #+end_src
+
+** Rainbow Mode
+
+Show me the color of an HEX
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package rainbow-mode
+    :config
+    (evil-define-key 'normal 'global (kbd "SPC t r") #'rainbow-mode))
+#+end_src
+
 ** Window Frame
 
 Remove ugly top frame from the macOS UI
