@@ -417,12 +417,15 @@ minimal window decoration.
 Leverage [[https://github.com/seagle0128/doom-modeline][doom-emacs modeline]].
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-    (use-package doom-modeline
-      :after (evil winum)
-      :hook (after-init . doom-modeline-mode)
-      :config
-      (setq doom-modeline-always-show-macro-register t)
-      (setq doom-modeline-modal-modern-icon nil))
+  (use-package doom-modeline
+    :after (evil winum)
+    :hook
+    ((after-init . doom-modeline-mode)
+     (prog-mode . column-number-mode))
+    :config
+    (setq doom-modeline-buffer-file-name 'relative-from-project)
+    (setq doom-modeline-always-show-macro-register t)
+    (setq doom-modeline-modal-modern-icon nil))
 #+END_SRC
 
 Also nyan-cat on the modeline
@@ -736,7 +739,6 @@ be distracting.
     (evil-define-key 'normal 'prog-mode-hook (kbd "SPC c n f") #'narrow-to-defun)
     (evil-define-key 'normal 'prog-mode-hook (kbd "SPC c w") #'widen))
 #+end_src
-
 
 ** Delimiter Setup (Parenthesis, Quotes, et al)
 
