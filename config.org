@@ -314,6 +314,23 @@ I want pretty symbols on my code
     (global-ligature-mode t))
 #+END_SRC
 
+** Highlight Git Changes
+
+I want special [[https://ianyepan.github.io/posts/emacs-git-gutter/][colored columns]] that indicate git changes in my source
+code
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package git-gutter
+    :hook (prog-mode . git-gutter-mode)
+    :config
+    (setq git-gutter:update-interval 0.02))
+
+  (use-package git-gutter-fringe
+    :config
+    (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+#+end_src
 ** Window Frame
 
 Remove ugly top frame from the macOS UI
