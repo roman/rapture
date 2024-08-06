@@ -185,12 +185,15 @@ Use =vterm= to run terminals in emacs
 
 ** Git Support
 
-The powerful =git= support
+- The powerful =git= support of =magit=
 
 #+begin_src emacs-lisp :tangle yes
   (use-package magit
     :config
-    (evil-define-key 'normal 'global (kbd "SPC g g") 'magit))
+    (setq magit-blame-echo-style 'headings)
+    (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
+    (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo))
+#+end_src
 #+end_src
 
 ** Envrc Support
