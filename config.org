@@ -991,12 +991,15 @@ Following recommendations from [[https://www.reddit.com/r/emacs/comments/a6uepj/
   #+end_src
 
 ** LSP
+*** Company mode
 
 Use =company= to make lsp-mode happy
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (use-package company)
 #+END_SRC
+
+*** Core LSP
 
 Add support for the Language Server Protocol APIs
 
@@ -1022,6 +1025,8 @@ Add support for the Language Server Protocol APIs
     :custom
     (lsp-enable-snippet nil))
 #+END_SRC
+
+*** LSP UI
 
 Add support for fancy lsp UI
 
