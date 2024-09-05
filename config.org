@@ -1083,3 +1083,38 @@ Add nix support
       (evil-define-key 'normal 'go-mode-map (kbd ", t t") #'go-test-current-test)
       (evil-define-key 'normal 'go-mode-map (kbd ", t f") #'go-test-current-file))
   #+END_SRC
+
+*** YAML
+
+JSON, but readable
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package yaml-mode
+    :mode "\\.(yml|yaml)")
+
+  (use-package yaml-pro
+    :after (yaml-mode)
+    :hook (yaml-mode . yaml-pro-mode)
+    :config
+    (evil-define-key
+      'normal 'yaml-pro-mode-map (kbd "z c")
+      #'yaml-pro-fold-at-point)
+    (evil-define-key
+      'normal 'yaml-pro-mode-map (kbd "z o")
+      #'yaml-pro-unfold-at-point)
+    (evil-define-key
+      'normal 'yaml-pro-mode-map (kbd "g k")
+      #'yaml-pro-prev-subtree)
+    (evil-define-key
+      'normal 'yaml-pro-mode-map (kbd "g j")
+      #'yaml-pro-next-subtree)
+    (evil-define-key
+      'normal 'yaml-pro-mode-map (kbd "g K")
+      #'yaml-pro-up-level)
+    (evil-define-key
+      'normal 'yaml-pro-mode-map (kbd "M-k")
+      #'yaml-pro-move-subtree-up)
+    (evil-define-key
+      'normal 'yaml-pro-mode-map (kbd "M-j")
+      #'yaml-pro-move-subtree-down))
+#+end_src
