@@ -284,6 +284,106 @@ Allow =PATH= environment to change depending on the buffer we are on
 		      time)))
 #+end_src
 
+*** After Save
+
+#+begin_src emacs-lisp :tangle yes
+    (defvar zoo/last-after-save-hook nil)
+    (defvar zoo/hook-overrides-hash-table (make-hash-table))
+
+  ;;;###autoload
+    (defun zoo/-get-hook-funcs (hook)
+      (delq nil (mapcar
+		 (lambda (e) (if (symbolp e) e))
+		 hook)))
+
+  ;;;###autoload
+    (defun zoo/-get-hook-funcs-names (hook)
+      (mapcar 'symbol-name
+	      (zoo/-get-hook-funcs
+	       (if (symbolp hook)
+		   (append (symbol-value hook)
+			   (default-value hook))
+		 hook))))
+
+  ;;;###autoload
+    (defun zoo/-get-all-hooks ()
+      (let (hlist (list))
+	(mapatoms (lambda (a)
+		    (if (and (not (null (string-match ".*-hook"
+						      (symbol-name a))))
+			     (not (functionp a)))
+			(add-to-list 'hlist a))))
+	hlist))
+
+  ;;;###autoload
+    (defun zoo/remove-from-hook (hook fname &optional local)
+      (interactive
+       (let ((hook (intern (ido-completing-read
+			    "Which hook? "
+			    (mapcar #'symbol-name (zoo/-get-all-hooks))))))
+	 (list hook
+	       (ido-completing-read "Which? " (zoo/-get-hook-funcs-names hook)))))
+      (remove-hook hook
+		   (if (stringp fname)
+		       (intern fname)
+		     fname)
+		   local))
+
+  ;;;###autoload
+    (defun zoo/remove-after-save-hook (fname &optional local)
+      (interactive (list (ido-completing-read
+			  "aWhich function: "
+			  (zoo/-get-hook-funcs-names 'after-save-hook))))
+      (zoo/remove-from-hook 'after-save-hook fname local))
+
+  ;;;###autoload
+    (defun zoo/add-after-save-hook (fname &optional local)
+      (interactive "aWhich function: ")
+      ;; write the function to the buffer-file-name for easy
+      ;; removal later on
+      (setf (gethash (buffer-file-name (current-buffer))
+		     zoo/hook-overrides-hash-table)
+	    fname)
+      (setq zoo/last-after-save-hook fname)
+      (add-hook 'after-save-hook fname t local)
+      (message (format "%s will execute after a save" fname)))
+
+      ;;;###autoload
+    (defun zoo/add-after-save-hook-kbd (key-seq &optional local)
+      (interactive
+       (list (read-key-sequence "Press key: ")))
+      (let ((sym (key-binding key-seq)))
+	(cond
+	 ((null sym)
+	  (user-error "No command is bound to %s" (key-description key-seq)))
+	 ((commandp sym)
+	  (zoo/add-after-save-hook sym local)))))
+
+  ;;;###autoload
+    (defun zoo/check-after-save-hook (fname)
+      (-contains? (zoo/-get-hook-funcs-names 'after-save-hook) (symbol-name fname)))
+
+  ;;;###autoload
+    (defun zoo/toggle-last-after-save-hook (&optional local)
+      (interactive)
+      (when zoo/last-after-save-hook
+	(if (zoo/check-after-save-hook zoo/last-after-save-hook)
+	    (progn
+	      (zoo/flash-mode-line zoo/after-save-hook-disabled-color 0.5)
+	      (zoo/remove-after-save-hook zoo/last-after-save-hook local))
+	  ;; else
+	  (zoo/flash-mode-line zoo/after-save-hook-activated-color 0.5)
+	  (zoo/add-after-save-hook zoo/last-after-save-hook local))))
+
+    (defvar zoo/after-save-hook-activated-color "#6AAF6A")
+    (defvar zoo/after-save-hook-disabled-color  "#D70000")
+
+  
+    (evil-define-key 'normal 'global (kbd "SPC a h s k") #'zoo/add-after-save-hook-kbd)
+    (evil-define-key 'normal 'global (kbd "SPC a h s f") #'zoo/add-after-save-hook)
+    (evil-define-key 'normal 'global (kbd "SPC a h s r") #'zoo/remove-after-save-hook)
+#+end_src
+
 * UI
 ** Fonts
 
