@@ -204,7 +204,8 @@ Use =vterm= to run terminals in emacs
     :config
     (setq magit-blame-echo-style 'headings)
     (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
-    (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo))
+    (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
+    (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file))
 #+end_src
 
 - Easy way to link code from editor to github pages
