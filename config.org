@@ -1038,6 +1038,18 @@ Add support for fancy lsp UI
     (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c i") #'lsp-ui-imenu))
 #+END_SRC
 
+*** DAP mode (Debugging)
+
+Allow me to run debuggers using the LSP framework
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package dap-mode
+    :init
+    (setq dap-autoconfigure-features '(sessions locals controls tooltip))
+    :after (lsp-mode)
+    :hook (lsp-mode . dap-mode))
+#+END_SRC
+
 ** Languages
 *** Nix
 
