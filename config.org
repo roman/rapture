@@ -166,6 +166,18 @@ Enable recentf-mode because I always want to be able to access recent files
   (setq recentf-max-saved-items 1000)
 #+end_src
 
+** Alternate Buffer Switch
+
+Allow me to switch back and forth between two buffers
+
+#+begin_src emacs-lisp :tangle yes
+  (defun zoo/alternate-buffer ()
+    (interactive)
+    (switch-to-buffer (other-buffer)))
+
+  (evil-global-set-key 'normal (kbd "SPC TAB") #'zoo/alternate-buffer)
+#+end_src
+
 ** Terminal
 
 Use =vterm= to run terminals in emacs
