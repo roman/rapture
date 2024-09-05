@@ -568,8 +568,9 @@ code
 
   #+begin_src emacs-lisp :tangle yes
     (use-package evil
+      :init
+      (setq-default fill-column 92)
       :config
-      (setq fill-column 120)
       (set-face-foreground 'fill-column-indicator "#ff6e64")
       (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
       (evil-define-key
