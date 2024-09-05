@@ -384,6 +384,47 @@ Allow =PATH= environment to change depending on the buffer we are on
     (evil-define-key 'normal 'global (kbd "SPC a h s r") #'zoo/remove-after-save-hook)
 #+end_src
 
+*** Last Call feature
+
+#+begin_src emacs-lisp :tangle yes
+  (defvar zoo/last-test-buffer nil)
+  (defvar zoo/last-test-point nil)
+  (defvar zoo/last-test-function nil)
+
+  ;;;###autoload
+  (defun zoo/store-last-test (fname)
+    (interactive "aWhich function: ")
+    (setq zoo/last-test-function fname)
+    (setq zoo/last-test-point (point))
+    (setq zoo/last-test-buffer (current-buffer)))
+
+  ;;;###autoload
+  (defun zoo/call-last-test ()
+    (interactive)
+    (when zoo/last-test-buffer
+      (save-excursion
+	(with-current-buffer zoo/last-test-buffer
+	  (goto-char zoo/last-test-point)
+	  (call-interactively zoo/last-test-function)))))
+
+  ;;;###autoload
+  (defun zoo/run-continously-after-save (key-seq &optional local)
+    "Run the given keybinding after every save on the same buffer and location."
+    (interactive
+     (list (read-key-sequence "Press key: ")))
+    (let ((sym (key-binding key-seq)))
+      (cond
+       ((null sym)
+	(user-error "No command is bound to %s" (key-description key-seq)))
+       ((commandp sym)
+	(progn
+	  (zoo/store-last-test sym)
+	  (zoo/add-after-save-hook 'zoo/call-last-test local))))))
+
+  (evil-define-key 'normal 'global (kbd "SPC a h s s") #'zoo/run-continously-after-save)
+  (evil-define-key 'normal 'global (kbd "SPC a h s t") #'zoo/toggle-last-after-save-hook)
+#+end_src
+
 * UI
 ** Fonts
 
