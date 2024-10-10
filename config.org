@@ -213,23 +213,30 @@ Use =vterm= to run terminals in emacs
 #+begin_src emacs-lisp :tangle yes
   (use-package git-link
     :init
-    (defun zoo/get-link-commit ()
+    (defun zoo/git-link-commit ()
       (interactive)
       (let ((git-link-use-commit t))
 	(call-interactively 'git-link)))
+
+    (defun zoo/git-link-airbnb-sourcegraph
+	(_hostname dirname filename branch commit start end)
+      (let ((hostname "sourcegraph.a.musta.ch"))
+	(git-link-sourcegraph hostname dirname filename branch commit start end)))
+
+    (defun zoo/git-link-commit-airbnb-sourcegraph
+	(_hostname dirname commit)
+      (let ((hostname "sourcegraph.a.musta.ch"))
+	(git-link-commit-sourcegraph hostname dirname commit)))
+
     :config
-    (add-to-list
-     'git-link-remote-alist
-     '("git.musta.ch" git-link-github))
-    (evil-define-key
-      'normal 'global (kbd "SPC g l")
-      #'git-link)
-    (add-to-list
-     'git-link-commit-remote-alist
-     '("git.musta.ch" git-link-commit-github))
-    (evil-define-key
-      'normal 'global (kbd "SPC g L")
-      #'git-link-commit))
+    ;; (add-to-list 'git-link-remote-alist
+    ;;  '("git.musta.ch" zoo/git-link-airbnb-sourcegraph))
+    (add-to-list 'git-link-remote-alist
+     '("git.musta.ch" zoo/git-link-airbnb-sourcegraph))
+    (evil-define-key 'normal 'global (kbd "SPC g l") #'git-link)
+    (add-to-list 'git-link-commit-remote-alist
+     '("git.musta.ch" zoo/git-link-commit-airbnb-sourcegraph))
+    (evil-define-key 'normal 'global (kbd "SPC g L") #'zoo/git-link-commit))
 #+end_src
 
 ** Envrc Support
