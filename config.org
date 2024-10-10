@@ -1084,6 +1084,17 @@ Add nix support
       (evil-define-key 'normal 'go-mode-map (kbd ", t f") #'go-test-current-file))
   #+END_SRC
 
+- Install ginkgo-mode to run ginkgo tests from emacs
+
+  #+BEGIN_SRC emacs-lisp :tangle yes
+    (use-package ginkgo-mode
+      :config
+      (evil-define-key 'normal 'ginkgo-mode-map (kbd ", t t") #'ginkgo-run-this-container)
+      (evil-define-key 'normal 'ginkgo-mode-map (kbd ", t f") #'ginkgo-run-all )
+      (evil-define-key 'normal 'ginkgo-mode-map (kbd ", t l") #'ginkgo-run-last)
+    )
+  #+END_SRC
+
 *** YAML
 
 JSON, but readable

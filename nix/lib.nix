@@ -13,6 +13,9 @@
         defaultInitFile = true;
         alwaysEnsure = true;
         alwaysTangle = true;
+        override = final: prev: {
+          inherit (self.packages.${pkgs.system}) ginkgo-mode;
+        };
       };
 
       runtimeDeps = builtins.attrValues {
