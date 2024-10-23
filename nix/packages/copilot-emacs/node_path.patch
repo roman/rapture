@@ -1,0 +1,22 @@
+diff --git a/copilot.el b/copilot.el
+index b6981c7..7ecc5d5 100644
+--- a/copilot.el
++++ b/copilot.el
+@@ -87,7 +87,7 @@ performance."
+   :group 'copilot
+   :type 'integer)
+ 
+-(defcustom copilot-node-executable (executable-find "node")
++(defcustom copilot-node-executable "__NODEJS_PATH__"
+   "Node executable path."
+   :group 'copilot
+   :type 'string)
+@@ -1082,7 +1082,7 @@ in `post-command-hook'."
+ (defun copilot-install-server ()
+   "Interactively install server."
+   (interactive)
+-  (if-let ((npm-binary (executable-find "npm")))
++  (if-let ((npm-binary "__NPM_PATH__"))
+       (progn
+         (make-directory copilot-install-dir 'parents)
+         (copilot-async-start-process

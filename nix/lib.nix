@@ -3,7 +3,7 @@
 {
   mkEmacs = pkgs:
     let
-      # add runtime dependencies to emacs
+      # Add runtime dependencies to emacs.
       inherit (pkgs) emacs;
       configFile = "${self}/config.org";
 
@@ -15,6 +15,7 @@
         alwaysTangle = true;
         override = final: prev: {
           inherit (self.packages.${pkgs.system}) ginkgo-mode;
+          copilot = self.packages.${pkgs.system}.copilot-emacs;
         };
       };
 
@@ -38,9 +39,6 @@
       buildInputs = [ pkgs.makeWrapper ];
       paths = [ emacsNoRTDeps ];
       doCheck = true;
-      checkPhase = ''
-        echo "********************** running check phase"
-      '';
       postBuild = ''
         wrapProgram $out/bin/emacs \
         	    --set SPLASH_IMG_PATH ${emacsSplash} \

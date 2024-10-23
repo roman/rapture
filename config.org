@@ -5,7 +5,7 @@ After transition from vanilla emacs to [[https://www.spacemacs.org/][spacemacs]]
 want to get back to vanilla emacs with my own custom setup. Following
 are a few reasons why I'm doing this:
 
-1) spacemacs and doom-emacs have a lot of bagghose editor configurations offer.
+1) spacemacs and doom-emacs have a lot of baggage with opinionated editor configurations.
 
 2) reproducibility is a pain -- I've grown accustomed to [[https://nixos.org/][Nix]] and
    reproducibility. I was using [[https://github.com/nix-ix-doom-emacs][nix-doom-emacs]] project for a while,
@@ -927,6 +927,24 @@ Allow me to see what keybindings/commands I'm using
     (evil-define-key 'normal 'global (kbd "SPC t c")
       #'rg/toggle-command-log-mode))
 #+END_SRC
+
+* AI
+** Github Copilot
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package copilot
+    :init
+    :config
+    (evil-define-key 'normal 'global (kbd "SPC t a") #'copilot-mode)
+    (evil-define-key 'insert 'copilot-mode-map (kbd "C-<tab>")
+      #'copilot-accept-completion)
+    (evil-define-key 'insert 'copilot-mode-map (kbd "C-n")
+      #'copilot-next-completion)
+    (evil-define-key 'insert 'copilot-mode-map (kbd "C-p")
+      #'copilot-previous-completion)
+    (add-to-list 'copilot-indentation-alist '(go-mode tab-width)))
+
+#+end_src
 
 * Coding
 ** Narrowing/Widen support
