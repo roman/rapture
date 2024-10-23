@@ -29,6 +29,7 @@ I'm a vimmer deep down, make emacs bearable.
     :functions (evil-mode evil-define-key evil-define-key*)
     :init
     (setq evil-want-keybinding nil)
+    (setq evil-want-minibuffer t)
     ;; https://stackoverflow.com/a/1242366
     (defun zoo/what-face (pos)
       (interactive "d")
