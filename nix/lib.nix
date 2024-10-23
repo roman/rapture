@@ -14,7 +14,7 @@
         alwaysEnsure = true;
         alwaysTangle = true;
         override = final: prev: {
-          inherit (self.packages.${pkgs.system}) ginkgo-mode;
+          inherit (self.packages.${pkgs.system}) ginkgo-mode gptel;
           copilot = self.packages.${pkgs.system}.copilot-emacs;
         };
       };

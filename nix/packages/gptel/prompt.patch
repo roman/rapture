@@ -1,0 +1,17 @@
+diff --git a/gptel.el b/gptel.el
+index 29a7a9b..ee6e358 100644
+--- a/gptel.el
++++ b/gptel.el
+@@ -375,11 +375,7 @@ Window' for details."
+   :type display-buffer--action-custom-type)
+ 
+ (defcustom gptel-crowdsourced-prompts-file
+-  (let ((cache-dir (or (eval-when-compile
+-			 (require 'xdg)
+-			 (xdg-cache-home))
+-                       user-emacs-directory)))
+-    (expand-file-name "gptel-crowdsourced-prompts.csv" cache-dir))
++  "__GPTEL_PROMPTS_FILE__"
+   "File used to store crowdsourced system prompts.
+ 
+ These are prompts cached from an online source (see
