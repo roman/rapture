@@ -1,4 +1,4 @@
-{ self, ... } @ _inputs: { lib, fetchFromGitHub, miller, emacsPackages }:
+{ self, ... } @ _inputs: { lib, fetchFromGitHub, emacsPackages }:
 
 let
   version = "0.9.6";
@@ -31,10 +31,8 @@ emacsPackages.trivialBuild {
   '';
 
   postBuild = ''
-    set -x
     mkdir -p $out
-    ${miller}/bin/mlr --csv cat ${self}/nix/packages/gptel/prompts.csv ${prompts}/prompts.csv > $out/gptel-prompts.csv;
-    cat $out/gptel-prompts.csv
-    set +x
+    cat ${self}/nix/packages/gptel/prompts.csv > $out/gptel-prompts.csv
+    tail -n +2 ${prompts}/prompts.csv >> $out/gptel-prompts.csv
   '';
 }

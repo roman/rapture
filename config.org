@@ -969,7 +969,7 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (require 'gptel-context)
     (require 'gptel-rewrite)
     (require 'gptel-transient)
-    (setq gptel-crowdsourced-prompts-file (expand-file-name "gptel-crowdsourced-prompts.csv" user-emacs-directory))
+
     (evil-define-key 'normal 'global (kbd "SPC i r") #'gptel)
 
     (evil-define-key 'normal 'global (kbd "SPC i i") #'gptel-menu)
