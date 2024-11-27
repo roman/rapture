@@ -1250,3 +1250,11 @@ JSON, but readable
     (use-package lsp-haskell)
   #+end_src
 
+*** PromQL
+
+#+begin_src emacs-lisp :tangle yes
+  (defun zoo/format-promql (s e)
+    (interactive "r")
+    (shell-command-on-region s e "promql-prettier"
+			     :replace t))
+#+end_src
