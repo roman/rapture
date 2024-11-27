@@ -1180,7 +1180,46 @@ Add nix support
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package go-mode
       :mode "\\.go"
-      :hook (go-mode . lsp-deferred))
+      :hook (go-mode . lsp-deferred)
+      :init
+      (use-package gptel
+	:defer t
+	:init
+	(defun zoo/-insert-fn-godoc (contents)
+	  (when contents
+	    (let* ((func-start (save-excursion (progn (go-beginning-of-defun) (point))))
+		   (godoc-comment (string-trim contents))
+		   (insertion-point (save-excursion
+				      (goto-char func-start)
+				      (line-beginning-position))))
+	      (save-excursion
+		(goto-char insertion-point)
+		(insert godoc-comment "\n")
+		(goto-char insertion-point)
+		(fill-paragraph))
+	      (message "Godoc comment inserted and formatted successfully."))))
+	(defun zoo/gen-fn-godoc ()
+	  "Generate godoc for the current Go function using gptel."
+	  (interactive)
+	  (if (not (eq major-mode 'go-mode))
+	      (message "This function only works in go-mode")
+	    (save-excursion
+	      (let* ((func-start (progn (go-beginning-of-defun) (point)))
+		     (func-name (progn (go-goto-function-name) (thing-at-point 'symbol)))
+		     (func-end (progn (go-end-of-defun) (point)))
+		     (func-content (buffer-substring-no-properties func-start func-end))
+		     (prompt (concat "Generate a godoc comment for the following Go function named '"
+				     func-name "', following standard library godoc standards. Focus "
+                                     "on documenting 'what' the code does, not 'how' nor 'why' it "
+				     "does it. Only return valid go comments, without any additional "
+				     "explanation or the function itself:\n\n"
+				     func-content)))
+		(gptel-request prompt
+		  :system "You are an expert Go programmer, skilled in writing clear and concise godoc comments."
+		  :stream nil
+		  :callback (lambda (response _info) (zoo/-insert-fn-godoc response)))))))
+	:config
+	(evil-define-key 'normal go-mode-map (kbd ", g d f") #'zoo/gen-fn-godoc)))
   #+END_SRC
 
 - Add keybindings to run go unit tests from emacs
