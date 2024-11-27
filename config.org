@@ -18,6 +18,14 @@ are a few reasons why I'm doing this:
    trying new things out is my jam. I don't like including layers that
    are highly opinionated.
 
+* Header
+
+Add a lexical header to ensure closures work as expected.
+
+#+begin_src emacs-lisp :tangle yes
+  ;; lexical-binding: t
+#+end_src
+
 * Evil
 ** Basics
 
