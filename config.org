@@ -219,12 +219,46 @@ Use =vterm= to run terminals in emacs
 - The powerful =git= support of =magit=.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package magit
-    :config
-    (setq magit-blame-echo-style 'headings)
-    (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
-    (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
-    (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file))
+    (use-package magit
+      :init
+      (use-package gptel
+	:defer t
+	:init
+	(defvar zoo/gen-commit-prompt-prefix
+	  "Use the 'conventional commits' standard."
+	  "Extra prompts overrides used in the generation of commit messages")
+	(defvar zoo/gen-commit-system
+	  "You are familiar with the 'conventional commits' standard."
+	  "Extra system overrides used in the generation of commit messages")
+  ;;;###autoload
+	(defun zoo/gen-commit-message ()
+	  "Generate a commit message using GPTel based on the current diff."
+	  (interactive)
+	  (when (and (buffer-file-name)
+		     (string-match-p "COMMIT_EDITMSG$" (buffer-file-name)))
+	    (let* ((diff-text (buffer-string))
+		   (prompt (concat "Based on the following Git diff, generate a concise "
+				   "and informative commit message describing the changes. "
+				   zoo/gen-commit-prompt-prefix
+				   " Only return the commit message, without any additional "
+				   "explanation or the diff itself:\n\n"
+				   diff-text))
+		   (response (gptel-request prompt
+			       :system
+			       (concat "You are a helpful assistant for generating "
+				       "Git commit messages. "
+				       zoo/gen-commit-system))))
+	      (save-excursion
+		(goto-char (point-min))
+		(insert response "\n\n")
+		(goto-char (point-min))))))
+	)
+      :config
+      (setq magit-blame-echo-style 'headings)
+      (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
+      (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
+      (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file)
+      (evil-define-key 'normal 'global (kbd "SPC g t") #'zoo/gen-commit-message))
 #+end_src
 
 - Easy way to link code from editor to github pages.
