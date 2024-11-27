@@ -1237,3 +1237,16 @@ JSON, but readable
       'normal yaml-pro-mode-map (kbd "M-j")
       #'yaml-pro-move-subtree-down))
 #+end_src
+
+*** Haskell
+- Basic Haskell mode
+  #+begin_src emacs-lisp :tangle yes
+    (use-package haskell-mode
+      :mode "\\.hs"
+      :hook (haskell-mode . lsp-deferred))
+  #+end_src
+- LSP niceties
+  #+begin_src emacs-lisp :tangle yes
+    (use-package lsp-haskell)
+  #+end_src
+
