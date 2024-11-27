@@ -985,6 +985,10 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
 
     (evil-define-key 'normal 'global (kbd "SPC i f") #'gptel-add-file)
 
+    (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "d") #'gptel-context-flag-deletion)
+    (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "n") #'gptel-context-next)
+    (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "N") #'gptel-context-previous)
+
     (setq
      gptel-default-mode #'org-mode
      gptel-model "claude-3-5-sonnet-20240620-v1:0"
