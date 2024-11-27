@@ -248,8 +248,6 @@ Use =vterm= to run terminals in emacs
 	    (git-link-commit-sourcegraph hostname dirname commit)))
 
 	:config
-	;; (add-to-list 'git-link-remote-alist
-	;;  '("git.musta.ch" zoo/git-link-airbnb-sourcegraph))
 	(add-to-list 'git-link-remote-alist
 	 '("git.musta.ch" zoo/git-link-airbnb-sourcegraph))
 	(evil-define-key 'normal 'global (kbd "SPC g l") #'git-link)
