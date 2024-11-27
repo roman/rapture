@@ -848,6 +848,8 @@ Setup projectile utilities
     :config
     (evil-define-key 'normal projectile-mode-map
       (kbd "SPC p f") #'projectile-find-file)
+    (evil-define-key 'normal projectile-mode-map
+      (kbd "SPC p k") #'projectile-kill-buffers))
 #+end_src
 
 ** Window Navigation
