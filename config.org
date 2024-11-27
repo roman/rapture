@@ -1146,6 +1146,20 @@ Allow me to run debuggers using the LSP framework
 #+END_SRC
 
 ** Languages
+*** Org
+
+- [[https://github.com/snosov1/toc-org][TOC support]]
+  #+begin_src emacs-lisp :tangle yes
+(use-package toc-org
+    :hook (org-mode . toc-org-mode))
+  #+end_src
+
+- [[https://github.com/minad/org-modern][Org Modern]]
+  #+begin_src emacs-lisp :tangle yes
+    (use-package org-modern
+      :hook (org-mode . org-modern-mode))
+  #+end_src
+
 *** Nix
 
 Add nix support
