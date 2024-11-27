@@ -200,7 +200,7 @@ Use =vterm= to run terminals in emacs
     :config
     (evil-define-key 'normal 'global (kbd "SPC o T") 'multi-vterm)
     (evil-define-key 'normal 'global (kbd "SPC o t") 'multi-vterm-project)
-    (evil-define-key 'insert 'vterm-mode-map (kbd "<deletechar>") 'vterm-send-delete)
+    (evil-define-key 'insert vterm-mode-map (kbd "<deletechar>") 'vterm-send-delete)
     (setq multi-vterm-dedicated-window-height-percent 30))
 #+end_src
 
@@ -578,7 +578,7 @@ code
       ;; ensure we are using the column style
       (setq highlight-indent-guides-method 'column)
       (evil-define-key
-	'normal 'prog-mode-map (kbd "SPC t i")
+	'normal prog-mode-map (kbd "SPC t i")
 	#'highlight-indent-guides-mode))
   #+end_src
 
@@ -592,7 +592,7 @@ code
       (set-face-foreground 'fill-column-indicator "#ff6e64")
       (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
       (evil-define-key
-	'normal 'prog-mode-map (kbd "SPC t f")
+	'normal prog-mode-map (kbd "SPC t f")
 	#'display-fill-column-indicator-mode))
   #+end_src
 
@@ -768,14 +768,14 @@ Use consult to perform searches across multiple APIs
       (consult-ripgrep dir))
 
     :config
-    (evil-define-key 'normal 'recentf-mode-map (kbd "SPC f r") #'consult-recent-file)
+    (evil-define-key 'normal recentf-mode-map (kbd "SPC f r") #'consult-recent-file)
     (evil-define-key 'normal 'global (kbd "SPC s s") #'consult-line)
     (evil-define-key 'normal 'global (kbd "SPC s i") #'consult-imenu)
     (evil-define-key 'normal 'global (kbd "SPC s D") #'zoo/ripgrep-dir)
     (evil-define-key 'normal
-      'projectile-mode-map (kbd "SPC p p") #'consult-ripgrep)
+      projectile-mode-map (kbd "SPC p p") #'consult-ripgrep)
     (evil-define-key 'normal
-      'org-mode-map (kbd "SPC s i") #'consult-org-heading)
+      org-mode-map (kbd "SPC s i") #'consult-org-heading)
     :custom
     (consult-project-root-function #'dw/get-project-root)
     (complete-in-region-function #'consult-completion-in-region))
@@ -796,7 +796,7 @@ Use [[https://github.com/minad/consult-flycheck][consult-flycheck]] to search fl
     :after (evil consult flycheck)
     :config
     (evil-define-key 'normal
-      'flycheck-mode-map (kbd "SPC e e") 'consult-flycheck))
+      flycheck-mode-map (kbd "SPC e e") 'consult-flycheck))
 #+END_SRC
 
 Use [[https://github.com/oantolin/orderless][orderless]] to have easy to search terms
@@ -846,8 +846,8 @@ Setup projectile utilities
 #+begin_src emacs-lisp :tangle yes
   (use-package projectile
     :config
-    (evil-define-key 'normal
-      'projectile-mode-map (kbd "SPC p f") #'projectile-find-file))
+    (evil-define-key 'normal projectile-mode-map
+      (kbd "SPC p f") #'projectile-find-file)
 #+end_src
 
 ** Window Navigation
@@ -947,11 +947,11 @@ Allow me to see what keybindings/commands I'm using
     :init
     :config
     (evil-define-key 'normal 'global (kbd "SPC t a") #'copilot-mode)
-    (evil-define-key 'insert 'copilot-mode-map (kbd "C-<tab>")
+    (evil-define-key 'insert copilot-mode-map (kbd "C-<tab>")
       #'copilot-accept-completion)
-    (evil-define-key 'insert 'copilot-mode-map (kbd "C-n")
+    (evil-define-key 'insert copilot-mode-map (kbd "C-n")
       #'copilot-next-completion)
-    (evil-define-key 'insert 'copilot-mode-map (kbd "C-p")
+    (evil-define-key 'insert copilot-mode-map (kbd "C-p")
       #'copilot-previous-completion)
     (add-to-list 'copilot-indentation-alist '(go-mode tab-width)))
 
@@ -1010,8 +1010,8 @@ be distracting.
 #+begin_src emacs-lisp :tangle yes
   (use-package evil
     :config
-    (evil-define-key 'normal 'prog-mode-hook (kbd "SPC c n f") #'narrow-to-defun)
-    (evil-define-key 'normal 'prog-mode-hook (kbd "SPC c w") #'widen))
+    (evil-define-key 'normal prog-mode-hook (kbd "SPC c n f") #'narrow-to-defun)
+    (evil-define-key 'normal prog-mode-hook (kbd "SPC c w") #'widen))
 #+end_src
 
 ** Delimiter Setup (Parenthesis, Quotes, et al)
@@ -1092,15 +1092,15 @@ Add support for the Language Server Protocol APIs
       (interactive (list (read-directory-name "Directory: " default-directory)))
       (lsp-workspace-folders-add dir))
 
-    :config
-    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c p a") #'zoo/lsp-add-workspace)
-    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c d") #'lsp-find-definition)
-    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c D") #'lsp-find-references)
-    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c r") #'lsp-rename)
-    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c f") #'lsp-format-buffer)
-    (setq lsp-enable-file-watchers nil)
-    :custom
-    (lsp-enable-snippet nil))
+      :config
+      (evil-define-key 'normal lsp-mode-map (kbd "SPC c p a") #'zoo/lsp-add-workspace)
+      (evil-define-key 'normal lsp-mode-map (kbd "SPC c d") #'lsp-find-definition)
+      (evil-define-key 'normal lsp-mode-map (kbd "SPC c D") #'lsp-find-references)
+      (evil-define-key 'normal lsp-mode-map (kbd "SPC c r") #'lsp-rename)
+      (evil-define-key 'normal lsp-mode-map (kbd "SPC c f") #'lsp-format-buffer)
+      (setq lsp-enable-file-watchers nil)
+      :custom
+      (lsp-enable-snippet nil))
 #+END_SRC
 
 *** LSP UI
@@ -1112,7 +1112,7 @@ Add support for fancy lsp UI
     :after (lsp-mode)
     :hook (lsp-mode . lsp-ui-mode)
     :config
-    (evil-define-key 'normal 'lsp-mode-map (kbd "SPC c i") #'lsp-ui-imenu))
+    (evil-define-key 'normal lsp-mode-map (kbd "SPC c i") #'lsp-ui-imenu))
 #+END_SRC
 
 *** DAP mode (Debugging)
@@ -1157,8 +1157,8 @@ Add nix support
     (use-package gotest
       :after (go-mode)
       :config
-      (evil-define-key 'normal 'go-mode-map (kbd ", t t") #'go-test-current-test)
-      (evil-define-key 'normal 'go-mode-map (kbd ", t f") #'go-test-current-file))
+      (evil-define-key 'normal go-mode-map (kbd ", t t") #'go-test-current-test)
+      (evil-define-key 'normal go-mode-map (kbd ", t f") #'go-test-current-file))
   #+END_SRC
 
 - Install ginkgo-mode to run ginkgo tests from emacs
@@ -1166,10 +1166,9 @@ Add nix support
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package ginkgo-mode
       :config
-      (evil-define-key 'normal 'ginkgo-mode-map (kbd ", t t") #'ginkgo-run-this-container)
-      (evil-define-key 'normal 'ginkgo-mode-map (kbd ", t f") #'ginkgo-run-all )
-      (evil-define-key 'normal 'ginkgo-mode-map (kbd ", t l") #'ginkgo-run-last)
-    )
+      (evil-define-key 'normal ginkgo-mode-map (kbd ", t t") #'ginkgo-run-this-container)
+      (evil-define-key 'normal ginkgo-mode-map (kbd ", t f") #'ginkgo-run-all )
+      (evil-define-key 'normal ginkgo-mode-map (kbd ", t l") #'ginkgo-run-last))
   #+END_SRC
 
 *** YAML
@@ -1185,24 +1184,24 @@ JSON, but readable
     :hook (yaml-mode . yaml-pro-mode)
     :config
     (evil-define-key
-      'normal 'yaml-pro-mode-map (kbd "z c")
+      'normal yaml-pro-mode-map (kbd "z c")
       #'yaml-pro-fold-at-point)
     (evil-define-key
-      'normal 'yaml-pro-mode-map (kbd "z o")
+      'normal yaml-pro-mode-map (kbd "z o")
       #'yaml-pro-unfold-at-point)
     (evil-define-key
-      'normal 'yaml-pro-mode-map (kbd "g k")
+      'normal yaml-pro-mode-map (kbd "g k")
       #'yaml-pro-prev-subtree)
     (evil-define-key
-      'normal 'yaml-pro-mode-map (kbd "g j")
+      'normal yaml-pro-mode-map (kbd "g j")
       #'yaml-pro-next-subtree)
     (evil-define-key
-      'normal 'yaml-pro-mode-map (kbd "g K")
+      'normal yaml-pro-mode-map (kbd "g K")
       #'yaml-pro-up-level)
     (evil-define-key
-      'normal 'yaml-pro-mode-map (kbd "M-k")
+      'normal yaml-pro-mode-map (kbd "M-k")
       #'yaml-pro-move-subtree-up)
     (evil-define-key
-      'normal 'yaml-pro-mode-map (kbd "M-j")
+      'normal yaml-pro-mode-map (kbd "M-j")
       #'yaml-pro-move-subtree-down))
 #+end_src
