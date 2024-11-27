@@ -1097,16 +1097,18 @@ Use =company= to make lsp-mode happy
 Add support for the Language Server Protocol APIs
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package lsp-mode
-    :after (evil)
-    :hook ((lsp-mode . company-mode)
-	   (lsp-mode . display-line-numbers-mode)
-	   (after-save . lsp-format-buffer))
+    (use-package lsp-mode
+      :after (evil)
+      :hook ((lsp-mode . company-mode)
+	     ;; This is really annoying when lsp doesn't support a format command for
+	     ;; a specific mode, disabling for now.
+	     ;; (after-save . lsp-format-buffer)
+	     (lsp-mode . display-line-numbers-mode))
 
-    :init
-    (defun zoo/lsp-add-workspace (dir)
-      (interactive (list (read-directory-name "Directory: " default-directory)))
-      (lsp-workspace-folders-add dir))
+      :init
+      (defun zoo/lsp-add-workspace (dir)
+	(interactive (list (read-directory-name "Directory: " default-directory)))
+	(lsp-workspace-folders-add dir))
 
       :config
       (evil-define-key 'normal lsp-mode-map (kbd "SPC c p a") #'zoo/lsp-add-workspace)
