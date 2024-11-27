@@ -104,6 +104,16 @@ Edit multiple entries at the same time
   (evil-multiedit-default-keybinds))
 #+END_SRC
 
+** Redo functionality
+
+Introduce a redo utility to be able to go back-and-forth between undos and redos.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package undo-tree
+    :config
+    (global-undo-tree-mode))
+#+end_src
+
 * Basics
 ** Package Management
 
