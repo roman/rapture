@@ -952,23 +952,6 @@ Allow me to see what keybindings/commands I'm using
 #+END_SRC
 
 * AI
-** Github Copilot
-
-#+begin_src emacs-lisp :tangle yes
-  (use-package copilot
-    :init
-    :config
-    (evil-define-key 'normal 'global (kbd "SPC t a") #'copilot-mode)
-    (evil-define-key 'insert copilot-mode-map (kbd "C-<tab>")
-      #'copilot-accept-completion)
-    (evil-define-key 'insert copilot-mode-map (kbd "C-n")
-      #'copilot-next-completion)
-    (evil-define-key 'insert copilot-mode-map (kbd "C-p")
-      #'copilot-previous-completion)
-    (add-to-list 'copilot-indentation-alist '(go-mode tab-width)))
-
-#+end_src
-
 ** gptel configuration
 *** Airbnb internal GPT utility
 
