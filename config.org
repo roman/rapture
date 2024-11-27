@@ -216,7 +216,7 @@ Use =vterm= to run terminals in emacs
 
 ** Git Support
 
-- The powerful =git= support of =magit=
+- The powerful =git= support of =magit=.
 
 #+begin_src emacs-lisp :tangle yes
   (use-package magit
@@ -227,7 +227,7 @@ Use =vterm= to run terminals in emacs
     (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file))
 #+end_src
 
-- Easy way to link code from editor to github pages
+- Easy way to link code from editor to github pages.
 
 #+begin_src emacs-lisp :tangle yes
       (use-package git-link
