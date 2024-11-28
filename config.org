@@ -254,6 +254,13 @@ Use =vterm= to run terminals in emacs
 		(goto-char (point-min))))))
 	)
       :config
+      ;; ensure the -v option is always enabled when doing a commit, this helps the generation
+      ;; of commit messages using gptel.
+      (transient-replace-suffix 'magit-commit '("-v")
+	'("-v" "Show diff of changes to be committed" ("-v" "--verbose")
+	  :init-value (lambda (obj)
+			(oset obj value '("--verbose")))
+	  :always-read t))
       (setq magit-blame-echo-style 'headings)
       (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
       (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
