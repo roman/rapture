@@ -500,7 +500,9 @@ Allow =PATH= environment to change depending on the buffer we are on
 Use [[https://github.com/tonsky/FiraCode?tab=readme-ov-file#whats-in-the-box][FiraCode]] as the font for the editor
 
 #+BEGIN_SRC emacs-lisp :tangle yes
-(set-frame-font "FiraCode Nerd Font 18" nil t)
+(set-frame-font "Hasklug Nerd Font 20" nil t)
+;; (set-frame-font "CodeNewRoman Nerd Font 22" nil t)
+;; (set-frame-font "FiraCode Nerd Font 18" nil t)
 #+END_SRC
 
 ** Ligatures
