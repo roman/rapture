@@ -871,7 +871,7 @@ Leverage [[https://github.com/doomemacs/themes?tab=readme-ov-file#manually--use-
     :config
     (setq doom-themes-enable-bold t
 	  doom-themes-enable-italic t)
-    ;; (load-theme 'wombat t)
+    (load-theme 'doom-peacock t)
     (doom-themes-visual-bell-config)
     (doom-themes-org-config))
 #+END_SRC
@@ -880,7 +880,7 @@ Leverage [[https://github.com/doomemacs/themes?tab=readme-ov-file#manually--use-
 
 Experimenenting with the [[https://gitlab.com/aimebertrand/timu-macos-theme][timu-macos theme]]
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp
   (use-package timu-macos-theme
     :config
     (load-theme 'timu-macos t)
