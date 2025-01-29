@@ -38,6 +38,7 @@ I'm a vimmer deep down, make emacs bearable.
     :init
     (setq evil-want-keybinding nil)
     (setq evil-want-minibuffer t)
+    (setq evil-undo-system 'undo-redo)
     ;; https://stackoverflow.com/a/1242366
     (defun zoo/what-face (pos)
       (interactive "d")
@@ -109,9 +110,10 @@ Edit multiple entries at the same time
 Introduce a redo utility to be able to go back-and-forth between undos and redos.
 
 #+begin_src emacs-lisp :tangle yes
-  (use-package undo-tree
+  (use-package vundo
     :config
-    (global-undo-tree-mode))
+    (set-face-attribute 'vundo-default nil :family "Symbola")
+    (setq vundo-glyph-alist vundo-unicode-symbols))
 #+end_src
 
 * Basics
