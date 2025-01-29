@@ -1176,10 +1176,21 @@ Allow me to run debuggers using the LSP framework
 ** Languages
 *** Org
 
+- Baseline
+#+begin_src emacs-lisp :tangle yes
+  (setq org-startup-with-inline-images t)
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-plantuml-exec-mode 'plantuml)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((plantuml . t)))
+  (add-hook 'org-babel-after-execute-hook #'org-redisplay-inline-images)
+#+end_src
+
 - [[https://github.com/snosov1/toc-org][TOC support]]
   #+begin_src emacs-lisp :tangle yes
-(use-package toc-org
-    :hook (org-mode . toc-org-mode))
+    (use-package toc-org
+	:hook (org-mode . toc-org-mode))
   #+end_src
 
 - [[https://github.com/minad/org-modern][Org Modern]]
@@ -1187,6 +1198,14 @@ Allow me to run debuggers using the LSP framework
     (use-package org-modern
       :hook (org-mode . org-modern-mode))
   #+end_src
+
+- [[https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-plantuml.html][PlantUML support]]
+#+begin_src emacs-lisp :tangle yes
+    (use-package plantuml-mode
+      :config
+      (setq plantuml-exec-mode 'executable)
+      (setq plantuml-default-exec-mode 'executable))
+#+end_src
 
 *** Nix
 
