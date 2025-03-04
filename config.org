@@ -901,9 +901,9 @@ Setup projectile utilities
 #+begin_src emacs-lisp :tangle yes
   (use-package projectile
     :config
-    (evil-define-key 'normal projectile-mode-map
+    (evil-define-key 'normal 'global
       (kbd "SPC p f") #'projectile-find-file)
-    (evil-define-key 'normal projectile-mode-map
+    (evil-define-key 'normal 'global
       (kbd "SPC p k") #'projectile-kill-buffers))
 #+end_src
 
@@ -1010,6 +1010,33 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (require 'gptel-rewrite)
     (require 'gptel-transient)
 
+    (defun zoo/gptel-configure-iap-auth ()
+      "Configure gptel API using iap-auth.
+      This command executes the iap-auth CLI tool to obtain a token,
+      then updates the gptel-backend with the new token."
+      (interactive)
+      (message "Executing iap-auth command...")
+      (let ((token (string-trim (shell-command-to-string "iap-auth"))))
+	(if (string-empty-p token)
+	    (message "Failed to obtain token from iap-auth")
+	  (message "Token obtained successfully")
+	  (if (gptel-backend-p gptel-backend)
+	      (setf (gptel-backend-key gptel-backend) token)
+	    (setq gptel-backend
+		  (gptel-make-gpt4all "airchat"
+		    :protocol "https"
+		    :host "devaigateway.a.musta.ch"
+		    :key token
+		    ;; :header '(("x-focusarea-id" . "default"))
+		    :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
+			      "claude-3-5-sonnet-20240620-v1:0"
+			      "gpt-4o"
+			      "gpt-4o-2024-08-06"
+			      "gpt-4-turbo-latest"
+			      "o1-mini"))))
+	  (message "gptel-backend updated with new token")
+	  (message "Updated gptel-backend"))))
+
     (evil-define-key 'normal 'global (kbd "SPC i r") #'gptel)
 
     (evil-define-key 'normal 'global (kbd "SPC i i") #'gptel-menu)
@@ -1022,10 +1049,14 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (evil-define-key 'visual 'global (kbd "SPC i a") #'gptel-add)
 
     (evil-define-key 'normal 'global (kbd "SPC i f") #'gptel-add-file)
+    (evil-define-key 'normal 'global (kbd "SPC i c") #'zoo/gptel-configure-iap-auth)
 
     (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "d") #'gptel-context-flag-deletion)
     (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "n") #'gptel-context-next)
     (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "N") #'gptel-context-previous)
+
+    (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
+    (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
 
     (setq
      gptel-default-mode #'org-mode
@@ -1033,9 +1064,9 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
      gptel-backend (gptel-make-gpt4all "airchat"
 		     :protocol "https"
 		     :host "devaigateway.a.musta.ch"
-		     :key "eyJhbGciOiJSUzI1NiIsImtpZCI6IjczZTI1Zjk3ODkxMTljNzg3NWQ1ODA4N2E3OGFjMjNmNWVmMmVkYTMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIxMDEyNTUxNzQyMTc5LWZrMHM4NDYxbDRoNWgzMDU1YWFmczMxZTdjMXQ5bDVtLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiYXVkIjoiMTAxMjU1MTc0MjE3OS0wOGUyM3RwcXN0YThsbXA2ajdzY3RkbGxtMTc3MG1qai5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjExMjM4MDk1MTEyODE1NDA0NTAyMyIsImhkIjoiYWlyYm5iLmNvbSIsImVtYWlsIjoicm9tYW4uZ29uemFsZXpAYWlyYm5iLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdF9oYXNoIjoidUtROERsdUhYa2Y5T1BQdTFaQmtBUSIsImdvb2dsZSI6eyJnaWMiOiJBR25IalFyQzRkd0FnYi1PLXJsRHJsQl9HMURTNEtudlpGMW95YnB6WU50S2xvblVqM3ZyY1FsU2J5b2VhenFuMmdfMFVnZGQ5THdiVTNGOHNVOXRrSXBScTF1VFVRbllZbS1JMDREN25QbEI5a1pMbGU4bUl6dS1ramVfWGZKak5SWXRmYi1LaGdJVmdrRWNiWmxQdmVsdFozNEhzVC1BMjdralNCVHRNcDQwYmRRT2RJQ2xlcmlQTjA0cHQ2bk80S3lpZ09kZnRVVXcydjB0c01rZ2EyMXdjZkZhV2JEVThrVG0ifSwiaWF0IjoxNzI5NTU0OTU2LCJleHAiOjE3Mjk1NTg1NTZ9.qnx38p3xdHJX0yL9Sl2oA2GcObo_8PPv3-GW4jZ6fDd-Ss-tgI7kkAb5_uH_q5vFUuOFb3N580-SdRCSx3tltHeaiqpsC0rHY0ZtLa9LckeQVWhgKekZobx6xh3fAIM64iJ2TcFf8FIhNEggGJztJelQDPj9_xDGwUZNjsCwyL7TCOn-394HH6wLwsqrn9BUxIMHrMgo-E1GVDqcO392W_RsyeH_Ues1MQyDmWvLwP6itkWxLZR39l1wPsmuumqU_S15dONOohT9LWZgr6JTNcapTkiRK7Oyex7fnzbfgsEu-7c0RE7xO1vEr0QkExau_tO7TdStzcRSobpNOeCWFg"
 		     ;; :header '(("x-focusarea-id" . "default"))
-		     :models '("claude-3-5-sonnet-20240620-v1:0"
+		     :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
+			       "claude-3-5-sonnet-20240620-v1:0"
 			       "gpt-4o"
 			       "gpt-4o-2024-08-06"
 			       "gpt-4-turbo-latest"
