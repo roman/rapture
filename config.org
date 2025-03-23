@@ -53,6 +53,7 @@ I'm a vimmer deep down, make emacs bearable.
     (evil-define-key 'normal 'global (kbd "SPC f s") #'save-buffer)
     (evil-define-key 'normal 'global (kbd "SPC b b") #'switch-to-buffer)
     (evil-define-key 'normal 'global (kbd "SPC b d") #'kill-buffer)
+    (evil-define-key 'normal 'global (kbd "SPC t l") #'toggle-truncate-lines)
     :custom
     (inhibit-startup-screen t))
 
@@ -604,6 +605,7 @@ code
 ** Highlight Columns
 
 - Highlight indentation columns
+
   #+begin_src emacs-lisp :tangle yes
     (use-package highlight-indent-guides
       :init
