@@ -1367,6 +1367,15 @@ JSON, but readable
     (use-package lsp-haskell)
   #+end_src
 
+*** Rust
+- Basic Rust mode
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package rust-mode
+    :mode "\\.rs"
+    :hook (rust-mode . lsp-deferred))
+#+end_src
+
 *** PromQL
 
 #+begin_src emacs-lisp :tangle yes
