@@ -19,8 +19,16 @@ in
           package = emacs;
         };
 
-        # The bash setup bellow allows vterm buffers to change the
-        # current path of the editor when performing cd commands.
+        services.emacs = {
+          enable = true;
+          package = emacs;
+          client.enable = true;
+          client.arguments = [ "-c" ];
+          defaultEditor = true;
+        };
+
+        # The bash setup below allows vterm buffers to change the current path of the editor
+        # when performing cd commands.
         programs.bash.initExtra = ''
           vterm_printf() {
             if [ -n "$TMUX" ] && ([ "''${TERM%%-*}" = "tmux" ] || [ "''${TERM%%-*}" = "screen" ] ); then
@@ -40,6 +48,5 @@ in
 
           PROMPT_COMMAND="vterm_prompt_end''${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
         '';
-
       };
 }
