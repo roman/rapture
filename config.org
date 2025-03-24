@@ -1265,7 +1265,8 @@ Add nix support
   #+BEGIN_SRC emacs-lisp :tangle yes
     (use-package go-mode
       :mode "\\.go"
-      :hook (go-mode . lsp-deferred)
+      :hook ((go-mode . lsp-deferred)
+	     (go-mode . (lambda () (setq tab-width 2))))
       :init
       (use-package gptel
 	:defer t
