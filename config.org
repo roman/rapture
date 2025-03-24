@@ -258,19 +258,21 @@ Use =vterm= to run terminals in emacs
 			    (goto-char (point-min))
 			    (insert response "\n\n")
 			    (goto-char (point-min)))))))))
-      :config
-      ;; ensure the -v option is always enabled when doing a commit, this helps the generation
-      ;; of commit messages using gptel.
-      (transient-replace-suffix 'magit-commit '("-v")
-	'("-v" "Show diff of changes to be committed" ("-v" "--verbose")
-	  :init-value (lambda (obj)
-			(oset obj value '("--verbose")))
-	  :always-read t))
-      (setq magit-blame-echo-style 'headings)
-      (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
-      (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
-      (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file)
-      (evil-define-key 'normal 'global (kbd "SPC g t") #'zoo/gen-commit-message))
+    :config
+    (transient-replace-suffix 'magit-commit 'magit-commit-autofixup
+      '("x" "Absorb changes" magit-commit-absorb))
+    ;; ensure the -v option is always enabled when doing a commit, this helps the generation
+    ;; of commit messages using gptel.
+    (transient-replace-suffix 'magit-commit '("-v")
+      '("-v" "Show diff of changes to be committed" ("-v" "--verbose")
+	:init-value (lambda (obj)
+		      (oset obj value '("--verbose")))
+	:always-read t))
+    (setq magit-blame-echo-style 'headings)
+    (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
+    (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
+    (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file)
+    (evil-define-key 'normal 'global (kbd "SPC g t") #'zoo/gen-commit-message))
 #+end_src
 
 - Easy way to link code from editor to github pages.
