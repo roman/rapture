@@ -1,7 +1,7 @@
 { self, ... } @ _inputs: { lib, fetchFromGitHub, emacsPackages }:
 
 let
-  version = "0.9.6";
+  version = "0.9.7";
 
   # Download general-purpose prompts and embed them to this project.
   prompts = fetchFromGitHub {
@@ -20,7 +20,7 @@ emacsPackages.trivialBuild {
     owner = "karthink";
     repo = "gptel";
     rev = "v${version}";
-    sha256 = "sha256-qhF9/RnF2C+dhGnoMWOVFCXQzWFrbllZ0A6lwmjnZTE=";
+    sha256 = "sha256-olUyeosLoc6fAJKJfPt+oWSp6Vl+ztgr1wRERkAT3pY=";
   };
 
   patches = [ ./prompt.patch ];
