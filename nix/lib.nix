@@ -21,7 +21,7 @@
 
       runtimeDeps = builtins.attrValues {
         inherit (pkgs)
-          ripgrep gcc gitMinimal git-absorb plantuml;
+          ripgrep gcc gitMinimal git-absorb plantuml direnv;
 
         inherit (self.packages.${pkgs.system})
           # nix development
