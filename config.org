@@ -506,6 +506,7 @@ Use [[https://github.com/tonsky/FiraCode?tab=readme-ov-file#whats-in-the-box][Fi
 
 #+BEGIN_SRC emacs-lisp :tangle yes
   (set-face-font 'default "Hasklug Nerd Font 20")
+  ;; (set-face-font 'default "FiraCode Nerd Font 18")
   (set-frame-font "Hasklug Nerd Font 20" nil t)
   ;; (set-frame-font "CodeNewRoman Nerd Font 22" nil t)
   ;; (set-frame-font "FiraCode Nerd Font 18" nil t)
