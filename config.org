@@ -1194,7 +1194,9 @@ Add support for fancy lsp UI
     :after (lsp-mode)
     :hook (lsp-mode . lsp-ui-mode)
     :config
-    (evil-define-key 'normal lsp-mode-map (kbd "SPC c i") #'lsp-ui-imenu))
+    (evil-define-key 'normal lsp-mode-map (kbd "SPC c i") #'lsp-ui-imenu)
+    (evil-define-key 'normal lsp-mode-map (kbd "SPC c s") #'lsp-ui-doc-show)
+    (evil-define-key 'normal lsp-mode-map (kbd "SPC c h") #'lsp-ui-doc-hide))
 #+END_SRC
 
 *** DAP mode (Debugging)
