@@ -24,7 +24,16 @@ in
           package = emacs;
           client.enable = true;
           client.arguments = [ "-c" ];
+          # For some reason, this is not working, doing explicit override on
+          # the next block of code[editor].
           defaultEditor = true;
+        };
+
+        # [editor]: initializing the EDITOR env var to allow git commit messages to work
+        # inside the same emacs session.
+        home.sessionVariables = {
+          EDITOR = lib.getBin (pkgs.writeShellScript "editor" ''
+            exec ${lib.getBin emacs}/bin/emacsclient "''${@:---create-frame}"'');
         };
 
         # The bash setup below allows vterm buffers to change the current path of the editor
