@@ -29,11 +29,13 @@ in
           defaultEditor = true;
         };
 
+
         # [editor]: initializing the EDITOR env var to allow git commit messages to work
         # inside the same emacs session.
         home.sessionVariables = {
           EDITOR = lib.getBin (pkgs.writeShellScript "editor" ''
-            exec ${lib.getBin emacs}/bin/emacsclient "''${@:---create-frame}"'');
+            exec ${lib.getBin emacs}/bin/emacsclient "''${@:---create-frame}"
+          '');
         };
 
         # The bash setup below allows vterm buffers to change the current path of the editor
