@@ -14,14 +14,14 @@
         alwaysEnsure = true;
         alwaysTangle = true;
         override = final: prev: {
-          inherit (self.packages.${pkgs.system}) ginkgo-mode gptel;
+          inherit (self.packages.${pkgs.system}) ginkgo-mode gptel evil;
           copilot = self.packages.${pkgs.system}.copilot-emacs;
         };
       };
 
       runtimeDeps = builtins.attrValues {
         inherit (pkgs)
-          ripgrep gcc gitMinimal git-absorb plantuml direnv;
+          ripgrep gcc gitMinimal git-absorb plantuml direnv nodejs_22;
 
         inherit (self.packages.${pkgs.system})
           # nix development
