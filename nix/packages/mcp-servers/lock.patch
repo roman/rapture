@@ -1,0 +1,22 @@
+diff --git a/package-lock.json b/package-lock.json
+index d682159..75bd3ca 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -5407,7 +5407,7 @@
+     },
+     "src/everything": {
+       "name": "@modelcontextprotocol/server-everything",
+-      "version": "0.6.2",
++      "version": "2025.4.8",
+       "license": "MIT",
+       "dependencies": {
+         "@modelcontextprotocol/sdk": "1.0.1",
+@@ -5555,7 +5555,7 @@
+     },
+     "src/github": {
+       "name": "@modelcontextprotocol/server-github",
+-      "version": "0.6.2",
++      "version": "2025.4.8",
+       "license": "MIT",
+       "dependencies": {
+         "@modelcontextprotocol/sdk": "1.0.1",
