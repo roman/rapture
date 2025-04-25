@@ -1445,6 +1445,32 @@ JSON, but readable
     (use-package lsp-haskell)
   #+end_src
 
+*** NodeJS/Typescript
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package typescript-mode
+    :mode "\\.ts")
+
+  (use-package nodejs-repl
+    :after (typescript-mode)
+    :config
+    (add-hook 'js-mode-hook #'nodejs-repl-minor-mode))
+
+  (use-package tide
+    :after (typescript-mode company flycheck)
+    :hook  ((typescript-mode . tide-setup)
+  	  (typescript-mode . tide-hl-identifier-mode)
+  	  (before-save . tide-format-before-save)))
+
+  (use-package js2-mode
+    :mode "\\.js")
+
+  (use-package xref-json2
+    :after (js2-mode)
+    :config
+    (setq xref-js2-search-program 'rg))
+#+end_src
+
 *** Rust
 - Basic Rust mode
 
