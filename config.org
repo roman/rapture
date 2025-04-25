@@ -1036,13 +1036,22 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
 		    :key token
 		    ;; :header '(("x-focusarea-id" . "default"))
 		    :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
+			      "gpt-4.1-mini"
+			      "anthropic.claude-3-5-haiku-20241022-v1:0"
+			      "claude-3-5-sonnet-20241022-v2:0"
+			      "gpt-4.1-nano"
+			      "o1"
+			      "gpt-4-turbo-vision"
+			      "gpt-4-0613"
 			      "claude-3-5-sonnet-20240620-v1:0"
-			      "gpt-4o"
-			      "gpt-4o-2024-08-06"
+			      "o4-mini-high"
 			      "gpt-4-turbo-latest"
-			      "o1-mini"))))
-	  (message "gptel-backend updated with new token")
-	  (message "Updated gptel-backend"))))
+			      "gpt-4.1"
+			      "anthropic.claude-3-5-sonnet-20241022-v2:0"
+			      "gpt-4o-mini"
+			      "gemini-2.5-pro"))))
+  	(message "gptel-backend updated with new token")
+  	(message "Updated gptel-backend"))))
 
     (evil-define-key 'normal 'global (kbd "SPC i r") #'gptel)
 
@@ -1067,17 +1076,76 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
 
     (setq
      gptel-default-mode #'org-mode
-     gptel-model "claude-3-5-sonnet-20240620-v1:0"
+     gptel-model "anthropic.claude-3-7-sonnet-20250219-v1:0"
      gptel-backend (gptel-make-gpt4all "airchat"
-		     :protocol "https"
-		     :host "devaigateway.a.musta.ch"
-		     ;; :header '(("x-focusarea-id" . "default"))
-		     :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
-			       "claude-3-5-sonnet-20240620-v1:0"
-			       "gpt-4o"
-			       "gpt-4o-2024-08-06"
-			       "gpt-4-turbo-latest"
-			       "o1-mini"))))
+  		   :protocol "https"
+  		   :host "devaigateway.a.musta.ch"
+  		   ;; :header '(("x-focusarea-id" . "default"))
+  		   :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
+  			     "gpt-4.1-mini"
+  			     "anthropic.claude-3-5-haiku-20241022-v1:0"
+  			     "claude-3-5-sonnet-20241022-v2:0"
+  			     "gpt-4.1-nano"
+  			     "o1"
+  			     "gpt-4-turbo-vision"
+  			     "gpt-4-0613"
+  			     "claude-3-5-sonnet-20240620-v1:0"
+  			     "o4-mini-high"
+  			     "gpt-4-turbo-latest"
+  			     "gpt-4.1"
+  			     "anthropic.claude-3-5-sonnet-20241022-v2:0"
+  			     "gpt-4o-mini"
+  			     "gemini-2.5-pro"))))
+#+end_src
+
+** mcp.el configuration
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package mcp
+    :after (evil gptel)
+    :init
+    (defun rapture/gptel-mcp-register-tool ()
+      (interactive)
+      (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+        (mapcar #'(lambda (tool)
+  		  (apply #'gptel-make-tool
+  			 tool))
+  	      tools)))
+
+    (defun rapture/gptel-mcp-use-tool ()
+      (interactive)
+      (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+        (mapcar #'(lambda (tool)
+  		  (let ((path (list (plist-get tool :category)
+  				    (plist-get tool :name))))
+  		    (push (gptel-get-tool path)
+  			  gptel-tools)))
+  	      tools)))
+
+    (defun rapture/gptel-mcp-close-use-tool ()
+      (interactive)
+      (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+        (mapcar #'(lambda (tool)
+  		  (let ((path (list (plist-get tool :category)
+  				    (plist-get tool :name))))
+  		    (setq gptel-tools
+  			  (cl-remove-if #'(lambda (tool)
+  					    (equal path
+  						   (list (gptel-tool-category tool)
+  							 (gptel-tool-name tool))))
+  					gptel-tools))))
+  	      tools)))
+
+    :config
+    (setq mcp-hub-servers
+  	'(
+  	  ("filesystem" . (:command "@mcpServerFilesystem@" :args ("/Users/roman_gonzalez/Projects/kube-system")))
+  	  ("fetch" . (:command "@mcpServerFetch@"))
+  	 ))
+    (evil-define-key 'normal 'global (kbd "SPC i h h") #'mcp-hub)
+    (evil-define-key 'normal 'global (kbd "SPC i h S") #'mcp-hub-start-all-server)
+    (evil-define-key 'normal 'global (kbd "SPC i h l") #'mcp-hub-view-log)
+    )
 #+end_src
 
 * Coding

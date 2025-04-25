@@ -5,7 +5,14 @@
     let
       # Add runtime dependencies to emacs.
       inherit (pkgs) emacs;
-      configFile = "${self}/config.org";
+      inherit (self.packages.${pkgs.system}) mcp-servers;
+
+      configFile = pkgs.substituteAll {
+        name = "config.org";
+        src = "${self}/config.org";
+        mcpServerFilesystem = "${mcp-servers}/bin/mcp-server-filesystem";
+        mcpServerFetch = "${mcp-servers}/bin/mcp-server-fetch";
+      };
 
       emacsNoRTDeps = pkgs.emacsWithPackagesFromUsePackage {
         package = emacs;
@@ -15,6 +22,7 @@
         alwaysTangle = true;
         override = final: prev: {
           inherit (self.packages.${pkgs.system}) ginkgo-mode gptel;
+          mcp = self.packages.${pkgs.system}.mcpel;
         };
       };
 
