@@ -193,11 +193,11 @@ Enable recentf-mode because I always want to be able to access recent files
 Allow me to switch back and forth between two buffers
 
 #+begin_src emacs-lisp :tangle yes
-  (defun zoo/alternate-buffer ()
+  (defun rapture/alternate-buffer ()
     (interactive)
     (switch-to-buffer (other-buffer)))
 
-  (evil-global-set-key 'normal (kbd "SPC TAB") #'zoo/alternate-buffer)
+  (evil-global-set-key 'normal (kbd "SPC TAB") #'rapture/alternate-buffer)
 #+end_src
 
 ** Terminal
@@ -227,14 +227,14 @@ Use =vterm= to run terminals in emacs
     (use-package gptel
       :defer t
       :init
-      (defvar zoo/gen-commit-prompt-prefix
+      (defvar rapture/gen-commit-prompt-prefix
 	"Use the 'conventional commits' standard."
 	"Extra prompts overrides used in the generation of commit messages")
-      (defvar zoo/gen-commit-system
+      (defvar rapture/gen-commit-system
 	"You are familiar with the 'conventional commits' standard."
 	"Extra system overrides used in the generation of commit messages")
 	    ;;;###autoload
-      (defun zoo/gen-commit-message ()
+      (defun rapture/gen-commit-message ()
 	"Generate a commit message using GPTel based on the current diff."
 	(interactive)
 	(when (and (buffer-file-name)
@@ -242,7 +242,7 @@ Use =vterm= to run terminals in emacs
 	  (let* ((diff-text (buffer-string))
 		 (prompt (concat "Based on the following Git diff, generate a concise "
 				 "and informative commit message describing the changes. "
-				 zoo/gen-commit-prompt-prefix
+				 rapture/gen-commit-prompt-prefix
 				 " Only return the commit message, without any additional "
 				 "explanation or the diff itself:\n\n"
 				 diff-text))
@@ -251,7 +251,7 @@ Use =vterm= to run terminals in emacs
 	      :system
 	      (concat "You are a helpful assistant for generating "
 		      "Git commit messages. "
-		      zoo/gen-commit-system)
+		      rapture/gen-commit-system)
 	      :stream nil
 	      :callback (lambda (response _info)
 			  (save-excursion
@@ -272,7 +272,7 @@ Use =vterm= to run terminals in emacs
     (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
     (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
     (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file)
-    (evil-define-key 'normal 'global (kbd "SPC g t") #'zoo/gen-commit-message))
+    (evil-define-key 'normal 'global (kbd "SPC g t") #'rapture/gen-commit-message))
 #+end_src
 
 - Easy way to link code from editor to github pages.
@@ -280,30 +280,30 @@ Use =vterm= to run terminals in emacs
 #+begin_src emacs-lisp :tangle yes
       (use-package git-link
 	:init
-	(defun zoo/git-link-commit ()
+	(defun rapture/git-link-commit ()
 	  (interactive)
 	  (let ((git-link-use-commit t))
 	    (call-interactively 'git-link)))
 
-	(defun zoo/git-link-airbnb-sourcegraph
+	(defun rapture/git-link-airbnb-sourcegraph
 	    (_hostname dirname filename branch commit start end)
 	  (let ((hostname "sourcegraph.a.musta.ch"))
 	    (git-link-sourcegraph hostname dirname filename branch commit start end)))
 
-	(defun zoo/git-link-commit-airbnb-sourcegraph
+	(defun rapture/git-link-commit-airbnb-sourcegraph
 	    (_hostname dirname commit)
 	  (let ((hostname "sourcegraph.a.musta.ch"))
 	    (git-link-commit-sourcegraph hostname dirname commit)))
 
 	:config
 	(add-to-list 'git-link-remote-alist
-	 '("git.musta.ch" zoo/git-link-airbnb-sourcegraph))
+	 '("git.musta.ch" rapture/git-link-airbnb-sourcegraph))
 	(evil-define-key 'normal 'global (kbd "SPC g l") #'git-link)
 	(evil-define-key 'visual 'global (kbd "SPC g l") #'git-link)
 	(add-to-list 'git-link-commit-remote-alist
-	 '("git.musta.ch" zoo/git-link-commit-airbnb-sourcegraph))
-	(evil-define-key 'normal 'global (kbd "SPC g L") #'zoo/git-link-commit)
-	(evil-define-key 'visual 'global (kbd "SPC g L") #'zoo/git-link-commit))
+	 '("git.musta.ch" rapture/git-link-commit-airbnb-sourcegraph))
+	(evil-define-key 'normal 'global (kbd "SPC g L") #'rapture/git-link-commit)
+	(evil-define-key 'visual 'global (kbd "SPC g L") #'rapture/git-link-commit))
 #+end_src
 
 ** Envrc Support
@@ -320,11 +320,11 @@ Allow =PATH= environment to change depending on the buffer we are on
 *** Flash Modeline
 
 #+begin_src emacs-lisp :tangle yes
-  (defvar zoo/flash-mode-line-activate-color  "#8A2BE2"
+  (defvar rapture/flash-mode-line-activate-color  "#8A2BE2"
     "Color for when signaling an activation via flash-mode-line.")
-  (defvar zoo/flash-mode-line-success-color "#6AAF6A"
+  (defvar rapture/flash-mode-line-success-color "#6AAF6A"
     "Color for when signaling success outcome via flash-mode-line.")
-  (defvar zoo/flash-mode-line-failed-color  "#FF6347"
+  (defvar rapture/flash-mode-line-failed-color  "#FF6347"
     "Color for when signaling failed outcome via flash-mode-line.")
 
   (defvar zoo-mode-line-in-use nil
@@ -334,12 +334,12 @@ Allow =PATH= environment to change depending on the buffer we are on
     "Number of secs before trying to modify the mode-line again.")
 
   ;;;###autoload
-  (defun zoo/restore-modeline (orig-modeline-fg)
+  (defun rapture/restore-modeline (orig-modeline-fg)
     (set-face-background 'mode-line orig-modeline-fg)
     (setq zoo-mode-line-in-use nil))
 
   ;;;###autoload
-  (defun zoo/flash-mode-line (&optional color time)
+  (defun rapture/flash-mode-line (&optional color time)
     "Flashes the mod-line with a given COLOR for a period of TIME."
     (interactive)
     (if (not zoo-mode-line-in-use)
@@ -349,11 +349,11 @@ Allow =PATH= environment to change depending on the buffer we are on
 	  (setq zoo-mode-line-in-use t)
 	  (set-face-background 'mode-line color)
 	  (run-with-timer time nil
-			  'zoo/restore-modeline
+			  'rapture/restore-modeline
 			  orig-modeline-fg))
       ;; else
       (run-with-timer zoo-mode-line-usage-delay nil
-		      'zoo/flash-mode-line
+		      'rapture/flash-mode-line
 		      color
 		      time)))
 #+end_src
@@ -361,26 +361,26 @@ Allow =PATH= environment to change depending on the buffer we are on
 *** After Save
 
 #+begin_src emacs-lisp :tangle yes
-    (defvar zoo/last-after-save-hook nil)
-    (defvar zoo/hook-overrides-hash-table (make-hash-table))
+    (defvar rapture/last-after-save-hook nil)
+    (defvar rapture/hook-overrides-hash-table (make-hash-table))
 
   ;;;###autoload
-    (defun zoo/-get-hook-funcs (hook)
+    (defun rapture/-get-hook-funcs (hook)
       (delq nil (mapcar
 		 (lambda (e) (if (symbolp e) e))
 		 hook)))
 
   ;;;###autoload
-    (defun zoo/-get-hook-funcs-names (hook)
+    (defun rapture/-get-hook-funcs-names (hook)
       (mapcar 'symbol-name
-	      (zoo/-get-hook-funcs
+	      (rapture/-get-hook-funcs
 	       (if (symbolp hook)
 		   (append (symbol-value hook)
 			   (default-value hook))
 		 hook))))
 
   ;;;###autoload
-    (defun zoo/-get-all-hooks ()
+    (defun rapture/-get-all-hooks ()
       (let (hlist (list))
 	(mapatoms (lambda (a)
 		    (if (and (not (null (string-match ".*-hook"
@@ -390,13 +390,13 @@ Allow =PATH= environment to change depending on the buffer we are on
 	hlist))
 
   ;;;###autoload
-    (defun zoo/remove-from-hook (hook fname &optional local)
+    (defun rapture/remove-from-hook (hook fname &optional local)
       (interactive
        (let ((hook (intern (ido-completing-read
 			    "Which hook? "
-			    (mapcar #'symbol-name (zoo/-get-all-hooks))))))
+			    (mapcar #'symbol-name (rapture/-get-all-hooks))))))
 	 (list hook
-	       (ido-completing-read "Which? " (zoo/-get-hook-funcs-names hook)))))
+	       (ido-completing-read "Which? " (rapture/-get-hook-funcs-names hook)))))
       (remove-hook hook
 		   (if (stringp fname)
 		       (intern fname)
@@ -404,26 +404,26 @@ Allow =PATH= environment to change depending on the buffer we are on
 		   local))
 
   ;;;###autoload
-    (defun zoo/remove-after-save-hook (fname &optional local)
+    (defun rapture/remove-after-save-hook (fname &optional local)
       (interactive (list (ido-completing-read
 			  "aWhich function: "
-			  (zoo/-get-hook-funcs-names 'after-save-hook))))
-      (zoo/remove-from-hook 'after-save-hook fname local))
+			  (rapture/-get-hook-funcs-names 'after-save-hook))))
+      (rapture/remove-from-hook 'after-save-hook fname local))
 
   ;;;###autoload
-    (defun zoo/add-after-save-hook (fname &optional local)
+    (defun rapture/add-after-save-hook (fname &optional local)
       (interactive "aWhich function: ")
       ;; write the function to the buffer-file-name for easy
       ;; removal later on
       (setf (gethash (buffer-file-name (current-buffer))
-		     zoo/hook-overrides-hash-table)
+		     rapture/hook-overrides-hash-table)
 	    fname)
-      (setq zoo/last-after-save-hook fname)
+      (setq rapture/last-after-save-hook fname)
       (add-hook 'after-save-hook fname t local)
       (message (format "%s will execute after a save" fname)))
 
       ;;;###autoload
-    (defun zoo/add-after-save-hook-kbd (key-seq &optional local)
+    (defun rapture/add-after-save-hook-kbd (key-seq &optional local)
       (interactive
        (list (read-key-sequence "Press key: ")))
       (let ((sym (key-binding key-seq)))
@@ -431,58 +431,58 @@ Allow =PATH= environment to change depending on the buffer we are on
 	 ((null sym)
 	  (user-error "No command is bound to %s" (key-description key-seq)))
 	 ((commandp sym)
-	  (zoo/add-after-save-hook sym local)))))
+	  (rapture/add-after-save-hook sym local)))))
 
   ;;;###autoload
-    (defun zoo/check-after-save-hook (fname)
-      (-contains? (zoo/-get-hook-funcs-names 'after-save-hook) (symbol-name fname)))
+    (defun rapture/check-after-save-hook (fname)
+      (-contains? (rapture/-get-hook-funcs-names 'after-save-hook) (symbol-name fname)))
 
   ;;;###autoload
-    (defun zoo/toggle-last-after-save-hook (&optional local)
+    (defun rapture/toggle-last-after-save-hook (&optional local)
       (interactive)
-      (when zoo/last-after-save-hook
-	(if (zoo/check-after-save-hook zoo/last-after-save-hook)
+      (when rapture/last-after-save-hook
+	(if (rapture/check-after-save-hook rapture/last-after-save-hook)
 	    (progn
-	      (zoo/flash-mode-line zoo/after-save-hook-disabled-color 0.5)
-	      (zoo/remove-after-save-hook zoo/last-after-save-hook local))
+	      (rapture/flash-mode-line rapture/after-save-hook-disabled-color 0.5)
+	      (rapture/remove-after-save-hook rapture/last-after-save-hook local))
 	  ;; else
-	  (zoo/flash-mode-line zoo/after-save-hook-activated-color 0.5)
-	  (zoo/add-after-save-hook zoo/last-after-save-hook local))))
+	  (rapture/flash-mode-line rapture/after-save-hook-activated-color 0.5)
+	  (rapture/add-after-save-hook rapture/last-after-save-hook local))))
 
-    (defvar zoo/after-save-hook-activated-color "#6AAF6A")
-    (defvar zoo/after-save-hook-disabled-color  "#D70000")
+    (defvar rapture/after-save-hook-activated-color "#6AAF6A")
+    (defvar rapture/after-save-hook-disabled-color  "#D70000")
 
   
-    (evil-define-key 'normal 'global (kbd "SPC a h s k") #'zoo/add-after-save-hook-kbd)
-    (evil-define-key 'normal 'global (kbd "SPC a h s f") #'zoo/add-after-save-hook)
-    (evil-define-key 'normal 'global (kbd "SPC a h s r") #'zoo/remove-after-save-hook)
+    (evil-define-key 'normal 'global (kbd "SPC a h s k") #'rapture/add-after-save-hook-kbd)
+    (evil-define-key 'normal 'global (kbd "SPC a h s f") #'rapture/add-after-save-hook)
+    (evil-define-key 'normal 'global (kbd "SPC a h s r") #'rapture/remove-after-save-hook)
 #+end_src
 
 *** Last Call feature
 
 #+begin_src emacs-lisp :tangle yes
-  (defvar zoo/last-test-buffer nil)
-  (defvar zoo/last-test-point nil)
-  (defvar zoo/last-test-function nil)
+  (defvar rapture/last-test-buffer nil)
+  (defvar rapture/last-test-point nil)
+  (defvar rapture/last-test-function nil)
 
   ;;;###autoload
-  (defun zoo/store-last-test (fname)
+  (defun rapture/store-last-test (fname)
     (interactive "aWhich function: ")
-    (setq zoo/last-test-function fname)
-    (setq zoo/last-test-point (point))
-    (setq zoo/last-test-buffer (current-buffer)))
+    (setq rapture/last-test-function fname)
+    (setq rapture/last-test-point (point))
+    (setq rapture/last-test-buffer (current-buffer)))
 
   ;;;###autoload
-  (defun zoo/call-last-test ()
+  (defun rapture/call-last-test ()
     (interactive)
-    (when zoo/last-test-buffer
+    (when rapture/last-test-buffer
       (save-excursion
-	(with-current-buffer zoo/last-test-buffer
-	  (goto-char zoo/last-test-point)
-	  (call-interactively zoo/last-test-function)))))
+	(with-current-buffer rapture/last-test-buffer
+	  (goto-char rapture/last-test-point)
+	  (call-interactively rapture/last-test-function)))))
 
   ;;;###autoload
-  (defun zoo/run-continously-after-save (key-seq &optional local)
+  (defun rapture/run-continously-after-save (key-seq &optional local)
     "Run the given keybinding after every save on the same buffer and location."
     (interactive
      (list (read-key-sequence "Press key: ")))
@@ -492,11 +492,11 @@ Allow =PATH= environment to change depending on the buffer we are on
 	(user-error "No command is bound to %s" (key-description key-seq)))
        ((commandp sym)
 	(progn
-	  (zoo/store-last-test sym)
-	  (zoo/add-after-save-hook 'zoo/call-last-test local))))))
+	  (rapture/store-last-test sym)
+	  (rapture/add-after-save-hook 'rapture/call-last-test local))))))
 
-  (evil-define-key 'normal 'global (kbd "SPC a h s s") #'zoo/run-continously-after-save)
-  (evil-define-key 'normal 'global (kbd "SPC a h s t") #'zoo/toggle-last-after-save-hook)
+  (evil-define-key 'normal 'global (kbd "SPC a h s s") #'rapture/run-continously-after-save)
+  (evil-define-key 'normal 'global (kbd "SPC a h s t") #'rapture/toggle-last-after-save-hook)
 #+end_src
 
 * UI
@@ -614,7 +614,7 @@ code
     (use-package highlight-indent-guides
       :init
       ;; https://emacs.stackexchange.com/a/74191
-      (defun zoo/-dump-face-attributes (face &rest props)
+      (defun rapture/-dump-face-attributes (face &rest props)
 	(cl-loop for prop in (or props
 				 (sort (mapcar #'car face-attribute-name-alist)
 				       (lambda (s1 s2)
@@ -622,19 +622,19 @@ code
 		 for val = (face-attribute face prop nil t)
 		 unless (eq val 'unspecified)
 		 append (list prop val)))
-      (defun zoo/get-face-attribute (face prop)
-	(plist-get (zoo/-dump-face-attributes face prop) prop))
+      (defun rapture/get-face-attribute (face prop)
+	(plist-get (rapture/-dump-face-attributes face prop) prop))
 
       :config
       ;; disable default coloring
       (setq highlight-indent-guides-auto-enabled nil)
       (set-face-background
        'highlight-indent-guides-even-face
-       (zoo/get-face-attribute 'font-lock-type-face :foreground))
+       (rapture/get-face-attribute 'font-lock-type-face :foreground))
 
       (set-face-background
 	'highlight-indent-guides-odd-face
-	(zoo/get-face-attribute 'font-lock-variable-name-face :foreground))
+	(rapture/get-face-attribute 'font-lock-variable-name-face :foreground))
 
       ;; ensure we are using the column style
       (setq highlight-indent-guides-method 'column)
@@ -824,7 +824,7 @@ Use consult to perform searches across multiple APIs
     (defun dw/get-project-root ()
       (when (fboundp 'projectile-project-root)
 	(projectile-project-root)))
-    (defun zoo/ripgrep-dir (dir)
+    (defun rapture/ripgrep-dir (dir)
       (interactive (list (read-directory-name "Directory: " default-directory)))
       (consult-ripgrep dir))
 
@@ -832,7 +832,7 @@ Use consult to perform searches across multiple APIs
     (evil-define-key 'normal recentf-mode-map (kbd "SPC f r") #'consult-recent-file)
     (evil-define-key 'normal 'global (kbd "SPC s s") #'consult-line)
     (evil-define-key 'normal 'global (kbd "SPC s i") #'consult-imenu)
-    (evil-define-key 'normal 'global (kbd "SPC s D") #'zoo/ripgrep-dir)
+    (evil-define-key 'normal 'global (kbd "SPC s D") #'rapture/ripgrep-dir)
     (evil-define-key 'normal
       projectile-mode-map (kbd "SPC p p") #'consult-ripgrep)
     (evil-define-key 'normal
@@ -1016,18 +1016,19 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (require 'gptel-rewrite)
     (require 'gptel-transient)
 
-    (defun zoo/gptel-configure-iap-auth ()
+    (defun rapture/gptel-configure-iap-auth ()
       "Configure gptel API using iap-auth.
       This command executes the iap-auth CLI tool to obtain a token,
       then updates the gptel-backend with the new token."
       (interactive)
       (message "Executing iap-auth command...")
       (let ((token (string-trim (shell-command-to-string "iap-auth"))))
-	(if (string-empty-p token)
-	    (message "Failed to obtain token from iap-auth")
-	  (message "Token obtained successfully")
+        (if (string-empty-p token)
+  	  (message "Failed to obtain token from iap-auth")
+  	(message "Token obtained successfully")
 	  (if (gptel-backend-p gptel-backend)
 	      (setf (gptel-backend-key gptel-backend) token)
+	    ;;else
 	    (setq gptel-backend
 		  (gptel-make-gpt4all "airchat"
 		    :protocol "https"
@@ -1055,7 +1056,7 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (evil-define-key 'visual 'global (kbd "SPC i a") #'gptel-add)
 
     (evil-define-key 'normal 'global (kbd "SPC i f") #'gptel-add-file)
-    (evil-define-key 'normal 'global (kbd "SPC i c") #'zoo/gptel-configure-iap-auth)
+    (evil-define-key 'normal 'global (kbd "SPC i c") #'rapture/gptel-configure-iap-auth)
 
     (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "d") #'gptel-context-flag-deletion)
     (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "n") #'gptel-context-next)
@@ -1171,12 +1172,12 @@ Add support for the Language Server Protocol APIs
 	     (lsp-mode . display-line-numbers-mode))
 
       :init
-      (defun zoo/lsp-add-workspace (dir)
+      (defun rapture/lsp-add-workspace (dir)
 	(interactive (list (read-directory-name "Directory: " default-directory)))
 	(lsp-workspace-folders-add dir))
 
       :config
-      (evil-define-key 'normal lsp-mode-map (kbd "SPC c p a") #'zoo/lsp-add-workspace)
+      (evil-define-key 'normal lsp-mode-map (kbd "SPC c p a") #'rapture/lsp-add-workspace)
       (evil-define-key 'normal lsp-mode-map (kbd "SPC c d") #'lsp-find-definition)
       (evil-define-key 'normal lsp-mode-map (kbd "SPC c D") #'lsp-find-references)
       (evil-define-key 'normal lsp-mode-map (kbd "SPC c r") #'lsp-rename)
@@ -1272,7 +1273,7 @@ Add nix support
       (use-package gptel
 	:defer t
 	:init
-	(defun zoo/-insert-fn-godoc (contents)
+	(defun rapture/-insert-fn-godoc (contents)
 	  (when contents
 	    (let* ((func-start (save-excursion (progn (go-beginning-of-defun) (point))))
 		   (godoc-comment (string-trim contents))
@@ -1285,7 +1286,7 @@ Add nix support
 		(goto-char insertion-point)
 		(fill-paragraph))
 	      (message "Godoc comment inserted and formatted successfully."))))
-	(defun zoo/gen-fn-godoc ()
+	(defun rapture/gen-fn-godoc ()
 	  "Generate godoc for the current Go function using gptel."
 	  (interactive)
 	  (if (not (eq major-mode 'go-mode))
@@ -1304,9 +1305,9 @@ Add nix support
 		(gptel-request prompt
 		  :system "You are an expert Go programmer, skilled in writing clear and concise godoc comments."
 		  :stream nil
-		  :callback (lambda (response _info) (zoo/-insert-fn-godoc response)))))))
+		  :callback (lambda (response _info) (rapture/-insert-fn-godoc response)))))))
 	:config
-	(evil-define-key 'normal go-mode-map (kbd ", g d f") #'zoo/gen-fn-godoc)))
+	(evil-define-key 'normal go-mode-map (kbd ", g d f") #'rapture/gen-fn-godoc)))
   #+END_SRC
 
 - Add keybindings to run go unit tests from emacs
@@ -1388,7 +1389,7 @@ JSON, but readable
 *** PromQL
 
 #+begin_src emacs-lisp :tangle yes
-  (defun zoo/format-promql (s e)
+  (defun rapture/format-promql (s e)
     (interactive "r")
     (shell-command-on-region s e "promql-prettier"
 			     :replace t))
