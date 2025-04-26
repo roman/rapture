@@ -4,7 +4,7 @@
   mkEmacs = pkgs:
     let
       # Add runtime dependencies to emacs.
-      inherit (pkgs) emacs;
+      inherit (pkgs) emacs plantuml;
       inherit (self.packages.${pkgs.system}) mcp-servers revealjs;
 
       coreConfigFile = pkgs.replaceVars ./../config.org {
@@ -16,6 +16,7 @@
       configFile = pkgs.concatTextFile {
         name = "config.org";
         files = [ coreConfigFile self.packages.${pkgs.system}.rapture-airbb ];
+        plantuml = "${plantuml}/bin/plantuml";
       };
 
       emacsNoRTDeps = pkgs.emacsWithPackagesFromUsePackage {

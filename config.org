@@ -1249,6 +1249,7 @@ Allow me to run debuggers using the LSP framework
   #+begin_src emacs-lisp :tangle yes
     (setq org-startup-with-inline-images t)
     (setq org-confirm-babel-evaluate nil)
+    (setq org-plantuml-executable-path "@plantuml@")
     (setq org-plantuml-exec-mode 'plantuml)
     (org-babel-do-load-languages
      'org-babel-load-languages
@@ -1257,6 +1258,7 @@ Allow me to run debuggers using the LSP framework
   #+end_src
 
 - [[https://github.com/snosov1/toc-org][TOC support]]
+
   #+begin_src emacs-lisp :tangle yes
     (use-package toc-org
 	:hook (org-mode . toc-org-mode))
