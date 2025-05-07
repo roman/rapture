@@ -16,57 +16,57 @@ Documentation for configuration setup (see [[https://git.musta.ch/airbnb/dev-ai-
       then updates the gptel-backend with the new token."
       (interactive)
       (message "Executing iap-auth command...")
-      (let ((iapAuthBin "@iapAuthBin@")
-	    (token (string-trim (shell-command-to-string iapAuthBin))))
-	(if (string-empty-p token)
-	    (message "Failed to obtain token from iap-auth")
-	  (message "Token obtained successfully")
-	  (if (gptel-backend-p gptel-backend)
-	      (setf (gptel-backend-key gptel-backend) token)
-	    ;;else
-	    (setq gptel-backend
-		  (gptel-make-gpt4all "airchat"
-		    :protocol "https"
-		    :host "devaigateway.a.musta.ch"
-		    :key token-value
-		    ;; :header '(("x-focusarea-id" . "default"))
-		    :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
-			      "gpt-4.1-mini"
-			      "anthropic.claude-3-5-haiku-20241022-v1:0"
-			      "claude-3-5-sonnet-20241022-v2:0"
-			      "gpt-4.1-nano"
-			      "o1"
-			      "gpt-4-turbo-vision"
-			      "gpt-4-0613"
-			      "claude-3-5-sonnet-20240620-v1:0"
-			      "o4-mini-high"
-			      "gpt-4-turbo-latest"
-			      "gpt-4.1"
-			      "anthropic.claude-3-5-sonnet-20241022-v2:0"
-			      "gpt-4o-mini"
-			      "gemini-2.5-pro"))))
-	  (message "gptel-backend updated with new token")
-	  (message "Updated gptel-backend"))))
+      (let* ((iapAuthBin "@iapAuthBin@")
+  	   (token (string-trim (shell-command-to-string iapAuthBin))))
+        (if (string-empty-p token)
+  	  (message "Failed to obtain token from iap-auth")
+  	(message "Token obtained successfully")
+  	(if (gptel-backend-p gptel-backend)
+  	    (setf (gptel-backend-key gptel-backend) token)
+  	  ;;else
+  	  (setq gptel-backend
+  		(gptel-make-gpt4all "airchat"
+  		  :protocol "https"
+  		  :host "devaigateway.a.musta.ch"
+  		  :key token-value
+  		  ;; :header '(("x-focusarea-id" . "default"))
+  		  :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
+  			    "gpt-4.1-mini"
+  			    "anthropic.claude-3-5-haiku-20241022-v1:0"
+  			    "claude-3-5-sonnet-20241022-v2:0"
+  			    "gpt-4.1-nano"
+  			    "o1"
+  			    "gpt-4-turbo-vision"
+  			    "gpt-4-0613"
+  			    "claude-3-5-sonnet-20240620-v1:0"
+  			    "o4-mini-high"
+  			    "gpt-4-turbo-latest"
+  			    "gpt-4.1"
+  			    "anthropic.claude-3-5-sonnet-20241022-v2:0"
+  			    "gpt-4o-mini"
+  			    "gemini-2.5-pro"))))
+  	(message "gptel-backend updated with new token")
+  	(message "Updated gptel-backend"))))
     (evil-define-key 'normal 'global (kbd "SPC i c") #'airbb/gptel-configure-iap-auth)
     (setq
      gptel-model "anthropic.claude-3-7-sonnet-20250219-v1:0"
      gptel-backend (gptel-make-gpt4all "airchat"
-		     :protocol "https"
-		     :host "devaigateway.a.musta.ch"
-		     ;; :header '(("x-focusarea-id" . "default"))
-		     :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
-			       "gpt-4.1-mini"
-			       "anthropic.claude-3-5-haiku-20241022-v1:0"
-			       "claude-3-5-sonnet-20241022-v2:0"
-			       "gpt-4.1-nano"
-			       "o1"
-			       "gpt-4-turbo-vision"
-			       "gpt-4-0613"
-			       "claude-3-5-sonnet-20240620-v1:0"
-			       "o4-mini-high"
-			       "gpt-4-turbo-latest"
-			       "gpt-4.1"
-			       "anthropic.claude-3-5-sonnet-20241022-v2:0"
-			       "gpt-4o-mini"
-			       "gemini-2.5-pro"))))
+  		   :protocol "https"
+  		   :host "devaigateway.a.musta.ch"
+  		   ;; :header '(("x-focusarea-id" . "default"))
+  		   :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
+  			     "gpt-4.1-mini"
+  			     "anthropic.claude-3-5-haiku-20241022-v1:0"
+  			     "claude-3-5-sonnet-20241022-v2:0"
+  			     "gpt-4.1-nano"
+  			     "o1"
+  			     "gpt-4-turbo-vision"
+  			     "gpt-4-0613"
+  			     "claude-3-5-sonnet-20240620-v1:0"
+  			     "o4-mini-high"
+  			     "gpt-4-turbo-latest"
+  			     "gpt-4.1"
+  			     "anthropic.claude-3-5-sonnet-20241022-v2:0"
+  			     "gpt-4o-mini"
+  			     "gemini-2.5-pro"))))
 #+end_src
