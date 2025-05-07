@@ -1009,7 +1009,6 @@ Allow me to see what keybindings/commands I'm using
 
 * AI
 ** gptel configuration
-*** Airbnb internal GPT utility
 
 Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/devaigateway.md#from-third-party-plugins][instructions]].
 
@@ -1021,56 +1020,14 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (require 'gptel-rewrite)
     (require 'gptel-transient)
 
-    (defun rapture/gptel-configure-iap-auth ()
-      "Configure gptel API using iap-auth.
-      This command executes the iap-auth CLI tool to obtain a token,
-      then updates the gptel-backend with the new token."
-      (interactive)
-      (message "Executing iap-auth command...")
-      (let ((token (string-trim (shell-command-to-string "iap-auth"))))
-        (if (string-empty-p token)
-  	  (message "Failed to obtain token from iap-auth")
-  	(message "Token obtained successfully")
-	  (if (gptel-backend-p gptel-backend)
-	      (setf (gptel-backend-key gptel-backend) token)
-	    ;;else
-	    (setq gptel-backend
-		  (gptel-make-gpt4all "airchat"
-		    :protocol "https"
-		    :host "devaigateway.a.musta.ch"
-		    :key token
-		    ;; :header '(("x-focusarea-id" . "default"))
-		    :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
-			      "gpt-4.1-mini"
-			      "anthropic.claude-3-5-haiku-20241022-v1:0"
-			      "claude-3-5-sonnet-20241022-v2:0"
-			      "gpt-4.1-nano"
-			      "o1"
-			      "gpt-4-turbo-vision"
-			      "gpt-4-0613"
-			      "claude-3-5-sonnet-20240620-v1:0"
-			      "o4-mini-high"
-			      "gpt-4-turbo-latest"
-			      "gpt-4.1"
-			      "anthropic.claude-3-5-sonnet-20241022-v2:0"
-			      "gpt-4o-mini"
-			      "gemini-2.5-pro"))))
-  	(message "gptel-backend updated with new token")
-  	(message "Updated gptel-backend"))))
-
     (evil-define-key 'normal 'global (kbd "SPC i r") #'gptel)
-
     (evil-define-key 'normal 'global (kbd "SPC i i") #'gptel-menu)
     (evil-define-key 'visual 'global (kbd "SPC i i") #'gptel-menu)
-
     (evil-define-key 'normal 'global (kbd "SPC i s") #'gptel-send)
     (evil-define-key 'visual 'global (kbd "SPC i s") #'gptel-send)
-
     (evil-define-key 'normal 'global (kbd "SPC i a") #'gptel-add)
     (evil-define-key 'visual 'global (kbd "SPC i a") #'gptel-add)
-
     (evil-define-key 'normal 'global (kbd "SPC i f") #'gptel-add-file)
-    (evil-define-key 'normal 'global (kbd "SPC i c") #'rapture/gptel-configure-iap-auth)
 
     (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "d") #'gptel-context-flag-deletion)
     (evil-define-key 'normal gptel-context-buffer-mode-map (kbd "n") #'gptel-context-next)
@@ -1079,28 +1036,7 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
     (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
 
-    (setq
-     gptel-default-mode #'org-mode
-     gptel-model "anthropic.claude-3-7-sonnet-20250219-v1:0"
-     gptel-backend (gptel-make-gpt4all "airchat"
-  		   :protocol "https"
-  		   :host "devaigateway.a.musta.ch"
-  		   ;; :header '(("x-focusarea-id" . "default"))
-  		   :models '("anthropic.claude-3-7-sonnet-20250219-v1:0"
-  			     "gpt-4.1-mini"
-  			     "anthropic.claude-3-5-haiku-20241022-v1:0"
-  			     "claude-3-5-sonnet-20241022-v2:0"
-  			     "gpt-4.1-nano"
-  			     "o1"
-  			     "gpt-4-turbo-vision"
-  			     "gpt-4-0613"
-  			     "claude-3-5-sonnet-20240620-v1:0"
-  			     "o4-mini-high"
-  			     "gpt-4-turbo-latest"
-  			     "gpt-4.1"
-  			     "anthropic.claude-3-5-sonnet-20241022-v2:0"
-  			     "gpt-4o-mini"
-  			     "gemini-2.5-pro"))))
+    (setq gptel-default-mode #'org-mode))
 #+end_src
 
 ** mcp.el configuration

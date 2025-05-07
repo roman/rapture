@@ -7,12 +7,17 @@
       inherit (pkgs) emacs;
       inherit (self.packages.${pkgs.system}) mcp-servers revealjs;
 
-      configFile = pkgs.substituteAll {
+      coreConfigFile = pkgs.substituteAll {
         name = "config.org";
         src = "${self}/config.org";
         mcpServerFilesystem = "${mcp-servers}/bin/mcp-server-filesystem";
         mcpServerFetch = "${mcp-servers}/bin/mcp-server-fetch";
         revealjsPath = "${revealjs}";
+      };
+
+      configFile = pkgs.concatTextFile {
+        name = "config.org";
+        files = [ coreConfigFile self.packages.${pkgs.system}.rapture-airbb ];
       };
 
       emacsNoRTDeps = pkgs.emacsWithPackagesFromUsePackage {
