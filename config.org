@@ -1417,7 +1417,7 @@ JSON, but readable
   (use-package js2-mode
     :mode "\\.js")
 
-  (use-package xref-json2
+  (use-package xref-js2
     :after (js2-mode)
     :config
     (setq xref-js2-search-program 'rg))
