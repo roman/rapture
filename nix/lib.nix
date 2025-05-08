@@ -28,6 +28,7 @@
         alwaysTangle = true;
         override = final: prev: {
           inherit (self.packages.${pkgs.system}) ginkgo-mode gptel;
+          claude-code = self.packages.${pkgs.system}.emacs-claude-code;
           mcp = self.packages.${pkgs.system}.mcpel;
         };
       };

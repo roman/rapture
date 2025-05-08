@@ -1008,7 +1008,7 @@ Allow me to see what keybindings/commands I'm using
 #+END_SRC
 
 * AI
-** gptel configuration
+** gptel
 
 Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/devaigateway.md#from-third-party-plugins][instructions]].
 
@@ -1039,7 +1039,7 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (setq gptel-default-mode #'org-mode))
 #+end_src
 
-** mcp.el configuration
+** mcp.el
 
 #+begin_src emacs-lisp :tangle yes
   (use-package mcp
@@ -1088,6 +1088,25 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (evil-define-key 'normal 'global (kbd "SPC i h l") #'mcp-hub-view-log)
     )
 #+end_src
+
+** claude-code.el
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package eat)
+  (use-package claude-code
+    :after (eat)
+    :hook ((claude-code--start . sm-setup-claude-faces))
+    :config
+    (claude-code-mode)
+    (evil-define-key 'normal 'global (kbd "SPC i l l") #'claude-code-transient)
+    (evil-define-key 'normal 'global (kbd "SPC i l c") #'claude-code)
+    (evil-define-key 'normal 'global (kbd "SPC i l d") #'claude-code-current-directory)
+    (evil-define-key 'normal 'global (kbd "SPC i l b") #'claude-code-switch-to-buffer)
+    (evil-define-key 'normal 'global (kbd "SPC i l k") #'claude-code-kill)
+    (evil-define-key 'normal 'global (kbd "SPC i l s") #'claude-code-send-command)
+    (evil-define-key 'visual 'global (kbd "SPC i l s") #'claude-code-send-region))
+#+end_src
+
 
 * Coding
 ** Narrowing/Widen support
