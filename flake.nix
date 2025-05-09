@@ -35,5 +35,8 @@
       packages = pkgs: {
         emacs = self.lib.mkEmacs pkgs;
       };
+      nixpkgsConfig = {
+        allowUnfree = true;
+      };
     };
 }
