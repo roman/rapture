@@ -7,9 +7,7 @@
       inherit (pkgs) emacs;
       inherit (self.packages.${pkgs.system}) mcp-servers revealjs;
 
-      coreConfigFile = pkgs.substituteAll {
-        name = "config.org";
-        src = "${self}/config.org";
+      coreConfigFile = pkgs.replaceVars ./../config.org {
         mcpServerFilesystem = "${mcp-servers}/bin/mcp-server-filesystem";
         mcpServerFetch = "${mcp-servers}/bin/mcp-server-fetch";
         revealjsPath = "${revealjs}";
