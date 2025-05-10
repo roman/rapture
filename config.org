@@ -1279,14 +1279,13 @@ Allow me to run debuggers using the LSP framework
   #+end_src
 
 - [[https://revealjs.com/][RevealJS]] [[https://github.com/yjwen/org-reveal][Support]]
-
-#+begin_src emacs-lisp :tangle yes
-  ;; allow colorization of emacs code in revealJS slides
-  (use-package htmlize)
-  (use-package ox-reveal
-    :config
-    (setq org-reveal-root "file://@revealjsPath@"))
-#+end_src
+  #+begin_src emacs-lisp :tangle yes
+    ;; allow colorization of emacs code in revealJS slides
+    (use-package htmlize)
+    (use-package ox-reveal
+      :config
+      (setq org-reveal-root "file://@revealjsPath@"))
+  #+end_src
 
 *** Nix
 
