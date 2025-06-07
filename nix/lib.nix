@@ -11,12 +11,12 @@
         mcpServerFilesystem = "${mcp-servers}/bin/mcp-server-filesystem";
         mcpServerFetch = "${mcp-servers}/bin/mcp-server-fetch";
         revealjsPath = "${revealjs}";
+        plantuml = "${plantuml}/bin/plantuml";
       };
 
       configFile = pkgs.concatTextFile {
         name = "config.org";
         files = [ coreConfigFile self.packages.${pkgs.system}.rapture-airbb ];
-        plantuml = "${plantuml}/bin/plantuml";
       };
 
       emacsNoRTDeps = pkgs.emacsWithPackagesFromUsePackage {
