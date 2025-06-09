@@ -1021,6 +1021,8 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (require 'gptel-transient)
 
     (evil-define-key 'normal 'global (kbd "SPC i r") #'gptel)
+    (evil-define-key 'normal 'global (kbd "SPC i w") #'gptel-rewrite)
+    (evil-define-key 'visual 'global (kbd "SPC i w") #'gptel-rewrite)
     (evil-define-key 'normal 'global (kbd "SPC i i") #'gptel-menu)
     (evil-define-key 'visual 'global (kbd "SPC i i") #'gptel-menu)
     (evil-define-key 'normal 'global (kbd "SPC i s") #'gptel-send)
@@ -1078,6 +1080,7 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
   	      tools)))
 
     :config
+    (require 'mcp-hub)
     (setq mcp-hub-servers
   	'(
   	  ("filesystem" . (:command "@mcpServerFilesystem@" :args ("/Users/roman_gonzalez/Projects/kube-system")))
