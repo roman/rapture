@@ -1081,11 +1081,6 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
 
     :config
     (require 'mcp-hub)
-    (setq mcp-hub-servers
-  	'(
-  	  ("filesystem" . (:command "@mcpServerFilesystem@" :args ("/Users/roman_gonzalez/Projects/kube-system")))
-  	  ("fetch" . (:command "@mcpServerFetch@"))
-  	 ))
     (evil-define-key 'normal 'global (kbd "SPC i h h") #'mcp-hub)
     (evil-define-key 'normal 'global (kbd "SPC i h S") #'mcp-hub-start-all-server)
     (evil-define-key 'normal 'global (kbd "SPC i h l") #'mcp-hub-view-log)
@@ -1109,7 +1104,6 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (evil-define-key 'normal 'global (kbd "SPC i l s") #'claude-code-send-command)
     (evil-define-key 'visual 'global (kbd "SPC i l s") #'claude-code-send-region))
 #+end_src
-
 
 * Coding
 ** Narrowing/Widen support

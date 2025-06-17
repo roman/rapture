@@ -5,11 +5,9 @@
     let
       # Add runtime dependencies to emacs.
       inherit (pkgs) emacs plantuml;
-      inherit (self.packages.${pkgs.system}) mcp-servers revealjs;
+      inherit (self.packages.${pkgs.system}) revealjs;
 
       coreConfigFile = pkgs.replaceVars ./../config.org {
-        mcpServerFilesystem = "${mcp-servers}/bin/mcp-server-filesystem";
-        mcpServerFetch = "${mcp-servers}/bin/mcp-server-fetch";
         revealjsPath = "${revealjs}";
         plantuml = "${plantuml}/bin/plantuml";
       };
