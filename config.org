@@ -1284,6 +1284,12 @@ Allow me to run debuggers using the LSP framework
       (setq org-reveal-root "file://@revealjsPath@"))
   #+end_src
 
+*** CSV
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package csv-mode)
+#+end_src
+
 *** Nix
 
 Add nix support
