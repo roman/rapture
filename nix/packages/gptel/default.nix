@@ -1,7 +1,7 @@
 { self, ... } @ _inputs: { lib, fetchFromGitHub, emacsPackages }:
 
 let
-  version = "0.9.8";
+  version = "0.9.8.5";
 
   # Download general-purpose prompts and embed them to this project.
   prompts = fetchFromGitHub {
@@ -20,14 +20,14 @@ emacsPackages.trivialBuild {
     owner = "karthink";
     repo = "gptel";
     rev = "v${version}";
-    sha256 = "sha256-rVp4nP2uJRztfL0BpT7UlglLXXOEecNpZdQ8dtPYX/I=";
+    sha256 = "sha256-5/X4kuN3i7KeqSmdz0aetkiY+udFBxj5iquGtFuaoEc=";
   };
 
   patches = [ ./prompt.patch ];
 
   postPatch = ''
     ls -lah
-    substituteInPlace gptel.el --replace "__GPTEL_PROMPTS_FILE__" "$out/gptel-prompts.csv"
+    substituteInPlace gptel.el --replace-fail "__GPTEL_PROMPTS_FILE__" "$out/gptel-prompts.csv"
   '';
 
   postBuild = ''
