@@ -32,7 +32,7 @@
 
       runtimeDeps = builtins.attrValues {
         inherit (pkgs)
-          ripgrep gcc gitMinimal git-absorb plantuml direnv nodejs_22 claude-code;
+          ripgrep gcc gitMinimal git-absorb plantuml direnv nodejs_22;
 
         inherit (self.packages.${pkgs.system})
           # nix development
