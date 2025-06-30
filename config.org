@@ -221,90 +221,98 @@ Use =vterm= to run terminals in emacs
 
 - The powerful =git= support of =magit=.
 
-#+begin_src emacs-lisp :tangle yes
-  (use-package magit
-    :init
-    (use-package gptel
-      :defer t
+  #+begin_src emacs-lisp :tangle yes
+    (use-package magit
       :init
-      (defvar rapture/gen-commit-prompt-prefix
-	"Use the 'conventional commits' standard."
-	"Extra prompts overrides used in the generation of commit messages")
-      (defvar rapture/gen-commit-system
-	"You are familiar with the 'conventional commits' standard."
-	"Extra system overrides used in the generation of commit messages")
-	    ;;;###autoload
-      (defun rapture/gen-commit-message ()
-	"Generate a commit message using GPTel based on the current diff."
-	(interactive)
-	(when (and (buffer-file-name)
-		   (string-match-p "COMMIT_EDITMSG$" (buffer-file-name)))
-	  (let* ((diff-text (buffer-string))
-		 (prompt (concat "Based on the following Git diff, generate a concise "
-				 "and informative commit message describing the changes. "
-				 rapture/gen-commit-prompt-prefix
-				 " Only return the commit message, without any additional "
-				 "explanation or the diff itself:\n\n"
-				 diff-text))
-		 (response ))
-	    (gptel-request prompt
-	      :system
-	      (concat "You are a helpful assistant for generating "
-		      "Git commit messages. "
-		      rapture/gen-commit-system)
-	      :stream nil
-	      :callback (lambda (response _info)
-			  (save-excursion
-			    (goto-char (point-min))
-			    (insert response "\n\n")
-			    (goto-char (point-min)))))))))
-    :config
-    (transient-replace-suffix 'magit-commit 'magit-commit-autofixup
-      '("x" "Absorb changes" magit-commit-absorb))
-    ;; ensure the -v option is always enabled when doing a commit, this helps the generation
-    ;; of commit messages using gptel.
-    (transient-replace-suffix 'magit-commit '("-v")
-      '("-v" "Show diff of changes to be committed" ("-v" "--verbose")
-	:init-value (lambda (obj)
-		      (oset obj value '("--verbose")))
-	:always-read t))
-    (setq magit-blame-echo-style 'headings)
-    (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
-    (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
-    (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file)
-    (evil-define-key 'normal 'global (kbd "SPC g t") #'rapture/gen-commit-message))
-#+end_src
+      (use-package gptel
+        :defer t
+        :init
+        (defvar rapture/gen-commit-prompt-prefix
+          "Use the 'conventional commits' standard."
+          "Extra prompts overrides used in the generation of commit messages")
+        (defvar rapture/gen-commit-system
+          "You are familiar with the 'conventional commits' standard."
+          "Extra system overrides used in the generation of commit messages")
+    	    ;;;###autoload
+        (defun rapture/gen-commit-message ()
+          "Generate a commit message using GPTel based on the current diff."
+          (interactive)
+          (when (and (buffer-file-name)
+    		 (string-match-p "COMMIT_EDITMSG$" (buffer-file-name)))
+    	(let* ((diff-text (buffer-string))
+    	       (prompt (concat "Based on the following Git diff, generate a concise "
+    			       "and informative commit message describing the changes. "
+    			       rapture/gen-commit-prompt-prefix
+    			       " Only return the commit message, without any additional "
+    			       "explanation or the diff itself:\n\n"
+    			       diff-text))
+    	       (response ))
+    	  (gptel-request prompt
+    	    :system
+    	    (concat "You are a helpful assistant for generating "
+    		    "Git commit messages. "
+    		    rapture/gen-commit-system)
+    	    :stream nil
+    	    :callback (lambda (response _info)
+    			(save-excursion
+    			  (goto-char (point-min))
+    			  (insert response "\n\n")
+    			  (goto-char (point-min)))))))))
+      :config
+      (transient-replace-suffix 'magit-commit 'magit-commit-autofixup
+        '("x" "Absorb changes" magit-commit-absorb))
+      ;; ensure the -v option is always enabled when doing a commit, this helps the generation
+      ;; of commit messages using gptel.
+      (transient-replace-suffix 'magit-commit '("-v")
+        '("-v" "Show diff of changes to be committed" ("-v" "--verbose")
+          :init-value (lambda (obj)
+    		    (oset obj value '("--verbose")))
+          :always-read t))
+      (setq magit-blame-echo-style 'headings)
+      (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
+      (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
+      (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file)
+      (evil-define-key 'normal 'global (kbd "SPC g t") #'rapture/gen-commit-message))
+  #+end_src
 
 - Easy way to link code from editor to github pages.
 
-#+begin_src emacs-lisp :tangle yes
-      (use-package git-link
-	:init
-	(defun rapture/git-link-commit ()
-	  (interactive)
-	  (let ((git-link-use-commit t))
-	    (call-interactively 'git-link)))
+  #+begin_src emacs-lisp :tangle yes
+    (use-package git-link
+      :init
+      (defun rapture/git-link-commit ()
+        (interactive)
+        (let ((git-link-use-commit t))
+          (call-interactively 'git-link)))
 
-	(defun rapture/git-link-airbnb-sourcegraph
-	    (_hostname dirname filename branch commit start end)
-	  (let ((hostname "sourcegraph.a.musta.ch"))
-	    (git-link-sourcegraph hostname dirname filename branch commit start end)))
+      (defun rapture/git-link-airbnb-sourcegraph
+          (_hostname dirname filename branch commit start end)
+        (let ((hostname "sourcegraph.a.musta.ch"))
+          (git-link-sourcegraph hostname dirname filename branch commit start end)))
 
-	(defun rapture/git-link-commit-airbnb-sourcegraph
-	    (_hostname dirname commit)
-	  (let ((hostname "sourcegraph.a.musta.ch"))
-	    (git-link-commit-sourcegraph hostname dirname commit)))
+      (defun rapture/git-link-commit-airbnb-sourcegraph
+          (_hostname dirname commit)
+        (let ((hostname "sourcegraph.a.musta.ch"))
+          (git-link-commit-sourcegraph hostname dirname commit)))
 
-	:config
-	(add-to-list 'git-link-remote-alist
-	 '("git.musta.ch" rapture/git-link-airbnb-sourcegraph))
-	(evil-define-key 'normal 'global (kbd "SPC g l") #'git-link)
-	(evil-define-key 'visual 'global (kbd "SPC g l") #'git-link)
-	(add-to-list 'git-link-commit-remote-alist
-	 '("git.musta.ch" rapture/git-link-commit-airbnb-sourcegraph))
-	(evil-define-key 'normal 'global (kbd "SPC g L") #'rapture/git-link-commit)
-	(evil-define-key 'visual 'global (kbd "SPC g L") #'rapture/git-link-commit))
-#+end_src
+      :config
+      (add-to-list 'git-link-remote-alist
+    	       '("git.musta.ch" rapture/git-link-airbnb-sourcegraph))
+      (evil-define-key 'normal 'global (kbd "SPC g l") #'git-link)
+      (evil-define-key 'visual 'global (kbd "SPC g l") #'git-link)
+      (add-to-list 'git-link-commit-remote-alist
+    	       '("git.musta.ch" rapture/git-link-commit-airbnb-sourcegraph))
+      (evil-define-key 'normal 'global (kbd "SPC g L") #'rapture/git-link-commit)
+      (evil-define-key 'visual 'global (kbd "SPC g L") #'rapture/git-link-commit))
+  #+end_src
+
+- Show me the git history easily
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package git-timemachine
+      :config
+      (evil-define-key 'normal 'global (kbd "SPC g h") #'git-timemachine))
+  #+end_src
 
 ** Envrc Support
 
@@ -1038,6 +1046,11 @@ Setup [[https://git.musta.ch/airbnb/dev-ai-docs/blob/master/_infra/docs/apis/dev
     (setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
     (setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
 
+    (setq gptel-use-tools t)
+    (setq gptel-confirm-tool-calls t)
+    (setq gptel-include-tool-results t)
+
+    (setq gptel-log-level 'debug)
     (setq gptel-default-mode #'org-mode))
 #+end_src
 
