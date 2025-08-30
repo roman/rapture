@@ -1,0 +1,47 @@
+diff --git a/gptel-transient.el b/gptel-transient.el
+index 05209c2..9df2d2f 100644
+--- a/gptel-transient.el
++++ b/gptel-transient.el
+@@ -122,25 +122,6 @@ which see."
+       (unless gptel-crowdsourced-prompts-file
+         (run-at-time 0 nil #'gptel-system-prompt)
+         (user-error "No crowdsourced prompts available"))
+-      (unless (and (file-exists-p gptel-crowdsourced-prompts-file)
+-                   (time-less-p
+-                    (time-subtract (current-time) (days-to-time 14))
+-                    (file-attribute-modification-time
+-                     (file-attributes gptel-crowdsourced-prompts-file))))
+-        (when (y-or-n-p
+-               (concat
+-                "Fetch crowdsourced system prompts from "
+-                (propertize "https://github.com/f/awesome-chatgpt-prompts" 'face 'link)
+-                "?"))
+-          ;; Fetch file
+-          (message "Fetching prompts...")
+-          (let ((dir (file-name-directory gptel-crowdsourced-prompts-file)))
+-            (unless (file-exists-p dir) (mkdir dir 'create-parents))
+-            (if (url-copy-file gptel--crowdsourced-prompts-url
+-                               gptel-crowdsourced-prompts-file
+-                               'ok-if-already-exists)
+-		(message "Fetching prompts... done.")
+-              (message "Could not retrieve new prompts.")))))
+       (if (not (file-readable-p gptel-crowdsourced-prompts-file))
+           (progn (message "No crowdsourced prompts available")
+                  (call-interactively #'gptel-system-prompt))
+diff --git a/gptel.el b/gptel.el
+index 29a7a9b..ee6e358 100644
+--- a/gptel.el
++++ b/gptel.el
+@@ -375,11 +375,7 @@ Window' for details."
+   :type display-buffer--action-custom-type)
+ 
+ (defcustom gptel-crowdsourced-prompts-file
+-  (let ((cache-dir (or (eval-when-compile
+-			 (require 'xdg)
+-			 (xdg-cache-home))
+-                       user-emacs-directory)))
+-    (expand-file-name "gptel-crowdsourced-prompts.csv" cache-dir))
++  "__GPTEL_PROMPTS_FILE__"
+   "File used to store crowdsourced system prompts.
+ 
+ These are prompts cached from an online source (see

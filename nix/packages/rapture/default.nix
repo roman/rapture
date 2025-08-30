@@ -1,4 +1,4 @@
-{ lib, emptyFile, stdenv, concatTextFile, replaceVars, emacs, emacsWithPackagesFromUsePackage }:
+{ callPackage, symlinkJoin, lib, emptyFile, stdenv, concatTextFile, replaceVars, emacs, emacsWithPackagesFromUsePackage }:
 
 let
   api = import ../../lib/rapture.nix {
@@ -9,14 +9,31 @@ let
     { plugins ? [], package ? emacs }:
       let
 	result = api.buildConfig plugins;
-      in
-	emacsWithPackagesFromUsePackage {
+	emacs = emacsWithPackagesFromUsePackage {
 	  inherit package;
-	  inherit (result) config;
+	  inherit (result) config extraEmacsPackages override;
 	  defaultInitFile = true;
 	  alwaysEnsure = true;
 	  alwaysTangle = true;
 	};
+      in
+	symlinkJoin {
+	  name = "rapture";
+	  paths = [ emacs ] ++ result.buildInputs;
+	};
+	
+  plugins = {
+    evil = callPackage ./plugins/evil { };
+    ai = callPackage ./plugins/ai { };
+    ui = callPackage ./plugins/ui { };
+    basics = callPackage ./plugins/basics { };
+    navigation = callPackage ./plugins/navigation { };
+    help = callPackage ./plugins/help { };
+    coding = callPackage ./plugins/coding { };
+    org = callPackage ./plugins/org { };
+    langs = callPackage ./plugins/langs { };
+  };
+
 in
   # Dummy derivation that does nothing and serves as a bag for functions.
   stdenv.mkDerivation {
@@ -30,5 +47,5 @@ in
     '';
   } // {
     inherit (api) mkPlugin;
-    inherit buildEmacs;
+    inherit buildEmacs plugins;
   }

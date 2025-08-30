@@ -23,14 +23,36 @@ let
   getPluginsFromScope = pluginsScope:
     lib.removeAttrs pluginsScope ["callPackage" "newScope" "overrideScope" "packages"];
 
-  concatSortedPluginContents = plugins:
+  concatPluginContents = plugins:
     concatTextFile {
       name = "config.org";
       files = map toString plugins;
     };
 
+  # concatPluginEmacsInputs combines the emacsInputs setting for each plugin.
+  concatPluginEmacsInputs = plugins: epkgs:    
+    builtins.concatLists (map (plugin: plugin.emacsInputs epkgs) plugins);
+
+  # concatPluginOverride combines the overrides of each plugin.
+  concatPluginOverride = plugins: self: super:
+    builtins.foldl'
+      lib.mergeAttrs
+      {}
+      (map (plugin: plugin.pluginOverride self super) plugins);
+
+  concatPluginBuildInputs = plugins:
+    builtins.concatLists (map (plugin: plugin.buildInputs) plugins);
+
   mkPlugin =
-    { name, version ? "develop", depends ? [], buildInputs ? [], emacsInputs ? [], src, vars ? {} }:
+    { name,
+      version     ? "develop",
+      depends     ? (_plugins: []),
+      buildInputs ? [],
+      emacsInputs ? (_epkgs: []),
+      override    ? (_self: _super: {}),
+      vars ? {},
+      src,
+    }:
       let
 	resolvedSrc =
 	  if vars == {} 
@@ -56,11 +78,15 @@ let
         } //
 	# Keys that rapturePlugin derivations will have, these will later be used by the
 	# buildEmacs function to do the topological sorting.
-        { inherit emacsInputs rapturePluginInputs; };
+        {
+	  inherit emacsInputs rapturePluginInputs;
+	  pluginOverride = override;
+	};
 
   topoSort =
     import ./toposort.nix { inherit lib; } getPluginName getPluginDependencies;
 
+  # buildConfig creates the final config.org file with the given rapture plugins.
   buildConfig = plugins:
     let
 	parsedPlugins = parsePlugins plugins;
@@ -86,12 +112,16 @@ let
 
 	sortedPlugins = topoSort resolvedPlugins;
 
-	config = concatSortedPluginContents sortedPlugins;
+	config = concatPluginContents sortedPlugins;
+        extraEmacsPackages = concatPluginEmacsInputs sortedPlugins;
+        buildInputs = concatPluginBuildInputs sortedPlugins;
+        override = concatPluginOverride sortedPlugins;
     in
       {
-	inherit pluginScope parsedPlugins resolvedPlugins sortedPlugins config;
+	inherit pluginScope parsedPlugins resolvedPlugins sortedPlugins
+                config extraEmacsPackages buildInputs override;
       };
 in
   {
-    inherit getPluginName getPluginDependencies parsePlugins buildConfig mkPlugin concatSortedPluginContents; 
+    inherit getPluginName getPluginDependencies parsePlugins buildConfig mkPlugin ;concatSortedPluginContents = concatPluginContents; 
   }

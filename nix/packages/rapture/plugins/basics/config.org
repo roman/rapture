@@ -1,0 +1,344 @@
+
+* Basics
+** Package Management
+
+The only way to install packages is through the Nix package
+manager. The configuration bellow ensures that =use-package= doesn't
+install dependencies at runtime.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(require 'use-package)
+
+(setq package-enable-at-startup nil)
+(setq use-package-ensure-function 'ignore)
+(setq package-archives nil)
+#+END_SRC
+
+** Recent files
+
+Enable recentf-mode because I always want to be able to access recent files
+
+#+begin_src emacs-lisp :tangle yes
+  (recentf-mode 1)
+  (setq recentf-max-menu-items 50)
+  (setq recentf-max-saved-items 1000)
+#+end_src
+
+** Alternate Buffer Switch
+
+Allow me to switch back and forth between two buffers
+
+#+begin_src emacs-lisp :tangle yes
+  (defun rapture/alternate-buffer ()
+    (interactive)
+    (switch-to-buffer (other-buffer)))
+
+  (evil-global-set-key 'normal (kbd "SPC TAB") #'rapture/alternate-buffer)
+#+end_src
+
+** Terminal
+
+Use =vterm= to run terminals in emacs
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package multi-vterm
+    :init
+    ;; I set the shell to a modern bash to avoid deprecated notices from
+    ;; stock bash installed on the OS (hacky, I know)
+    (setq vterm-shell "~/.nix-profile/bin/bash")
+    :config
+    (evil-define-key 'normal 'global (kbd "SPC o T") 'multi-vterm)
+    (evil-define-key 'normal 'global (kbd "SPC o t") 'multi-vterm-project)
+    (evil-define-key 'insert vterm-mode-map (kbd "<deletechar>") 'vterm-send-delete)
+    (setq multi-vterm-dedicated-window-height-percent 30))
+#+end_src
+
+** Git Support
+
+- The powerful =git= support of =magit=.
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package magit
+      :init
+      (use-package gptel
+        :defer t
+        :init
+        (defvar rapture/gen-commit-prompt-prefix
+          "Use the 'conventional commits' standard."
+          "Extra prompts overrides used in the generation of commit messages")
+        (defvar rapture/gen-commit-system
+          "You are familiar with the 'conventional commits' standard."
+          "Extra system overrides used in the generation of commit messages")
+    	    ;;;###autoload
+        (defun rapture/gen-commit-message ()
+          "Generate a commit message using GPTel based on the current diff."
+          (interactive)
+          (when (and (buffer-file-name)
+    		 (string-match-p "COMMIT_EDITMSG$" (buffer-file-name)))
+    	(let* ((diff-text (buffer-string))
+    	       (prompt (concat "Based on the following Git diff, generate a concise "
+    			       "and informative commit message describing the changes. "
+    			       rapture/gen-commit-prompt-prefix
+    			       " Only return the commit message, without any additional "
+    			       "explanation or the diff itself:\n\n"
+    			       diff-text))
+    	       (response ))
+    	  (gptel-request prompt
+    	    :system
+    	    (concat "You are a helpful assistant for generating "
+    		    "Git commit messages. "
+    		    rapture/gen-commit-system)
+    	    :stream nil
+    	    :callback (lambda (response _info)
+    			(save-excursion
+    			  (goto-char (point-min))
+    			  (insert response "\n\n")
+    			  (goto-char (point-min)))))))))
+      :config
+      (transient-replace-suffix 'magit-commit 'magit-commit-autofixup
+        '("x" "Absorb changes" magit-commit-absorb))
+      ;; ensure the -v option is always enabled when doing a commit, this helps the generation
+      ;; of commit messages using gptel.
+      ;; (transient-replace-suffix 'magit-commit '("-v")
+      ;;   '("-v" "Show diff of changes to be committed" ("-v" "--verbose")
+      ;;     :init-value (lambda (obj)
+      ;; 		    (oset obj value '("--verbose")))
+      ;;     :always-read t))
+      (setq magit-blame-echo-style 'headings)
+      (evil-define-key 'normal 'global (kbd "SPC g g") #'magit)
+      (evil-define-key 'normal 'global (kbd "SPC g b") #'magit-blame-echo)
+      (evil-define-key 'normal 'global (kbd "SPC g f") #'magit-find-file)
+      (evil-define-key 'normal 'global (kbd "SPC g t") #'rapture/gen-commit-message))
+  #+end_src
+
+- Easy way to link code from editor to github pages.
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package git-link
+      :init
+      (defun rapture/git-link-commit ()
+        (interactive)
+        (let ((git-link-use-commit t))
+          (call-interactively 'git-link)))
+
+      (defun rapture/git-link-airbnb-sourcegraph
+          (_hostname dirname filename branch commit start end)
+        (let ((hostname "sourcegraph.a.musta.ch"))
+          (git-link-sourcegraph hostname dirname filename branch commit start end)))
+
+      (defun rapture/git-link-commit-airbnb-sourcegraph
+          (_hostname dirname commit)
+        (let ((hostname "sourcegraph.a.musta.ch"))
+          (git-link-commit-sourcegraph hostname dirname commit)))
+
+      :config
+      (add-to-list 'git-link-remote-alist
+    	       '("git.musta.ch" rapture/git-link-airbnb-sourcegraph))
+      (evil-define-key 'normal 'global (kbd "SPC g l") #'git-link)
+      (evil-define-key 'visual 'global (kbd "SPC g l") #'git-link)
+      (add-to-list 'git-link-commit-remote-alist
+    	       '("git.musta.ch" rapture/git-link-commit-airbnb-sourcegraph))
+      (evil-define-key 'normal 'global (kbd "SPC g L") #'rapture/git-link-commit)
+      (evil-define-key 'visual 'global (kbd "SPC g L") #'rapture/git-link-commit))
+  #+end_src
+
+- Show me the git history easily
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package git-timemachine
+      :config
+      (evil-define-key 'normal 'global (kbd "SPC g h") #'git-timemachine))
+  #+end_src
+
+** Envrc Support
+
+Allow =PATH= environment to change depending on the buffer we are on
+
+#+begin_src elisp :tangle yes
+  (use-package envrc
+    :config
+    (envrc-global-mode 1))
+#+end_src
+
+** Personal Customizations
+*** Flash Modeline
+
+#+begin_src emacs-lisp :tangle yes
+  (defvar rapture/flash-mode-line-activate-color  "#8A2BE2"
+    "Color for when signaling an activation via flash-mode-line.")
+  (defvar rapture/flash-mode-line-success-color "#6AAF6A"
+    "Color for when signaling success outcome via flash-mode-line.")
+  (defvar rapture/flash-mode-line-failed-color  "#FF6347"
+    "Color for when signaling failed outcome via flash-mode-line.")
+
+  (defvar zoo-mode-line-in-use nil
+    "Private var to check usage of mode-line before changing.")
+
+  (defvar zoo-mode-line-usage-delay 0.5
+    "Number of secs before trying to modify the mode-line again.")
+
+  ;;;###autoload
+  (defun rapture/restore-modeline (orig-modeline-fg)
+    (set-face-background 'mode-line orig-modeline-fg)
+    (setq zoo-mode-line-in-use nil))
+
+  ;;;###autoload
+  (defun rapture/flash-mode-line (&optional color time)
+    "Flashes the mod-line with a given COLOR for a period of TIME."
+    (interactive)
+    (if (not zoo-mode-line-in-use)
+	(let ((orig-modeline-fg (face-background 'mode-line))
+	      (time  (or time 2))
+	      (color (or color "#d70000")))
+	  (setq zoo-mode-line-in-use t)
+	  (set-face-background 'mode-line color)
+	  (run-with-timer time nil
+			  'rapture/restore-modeline
+			  orig-modeline-fg))
+      ;; else
+      (run-with-timer zoo-mode-line-usage-delay nil
+		      'rapture/flash-mode-line
+		      color
+		      time)))
+#+end_src
+
+*** After Save
+
+#+begin_src emacs-lisp :tangle yes
+    (defvar rapture/last-after-save-hook nil)
+    (defvar rapture/hook-overrides-hash-table (make-hash-table))
+
+  ;;;###autoload
+    (defun rapture/-get-hook-funcs (hook)
+      (delq nil (mapcar
+		 (lambda (e) (if (symbolp e) e))
+		 hook)))
+
+  ;;;###autoload
+    (defun rapture/-get-hook-funcs-names (hook)
+      (mapcar 'symbol-name
+	      (rapture/-get-hook-funcs
+	       (if (symbolp hook)
+		   (append (symbol-value hook)
+			   (default-value hook))
+		 hook))))
+
+  ;;;###autoload
+    (defun rapture/-get-all-hooks ()
+      (let (hlist (list))
+	(mapatoms (lambda (a)
+		    (if (and (not (null (string-match ".*-hook"
+						      (symbol-name a))))
+			     (not (functionp a)))
+			(add-to-list 'hlist a))))
+	hlist))
+
+  ;;;###autoload
+    (defun rapture/remove-from-hook (hook fname &optional local)
+      (interactive
+       (let ((hook (intern (ido-completing-read
+			    "Which hook? "
+			    (mapcar #'symbol-name (rapture/-get-all-hooks))))))
+	 (list hook
+	       (ido-completing-read "Which? " (rapture/-get-hook-funcs-names hook)))))
+      (remove-hook hook
+		   (if (stringp fname)
+		       (intern fname)
+		     fname)
+		   local))
+
+  ;;;###autoload
+    (defun rapture/remove-after-save-hook (fname &optional local)
+      (interactive (list (ido-completing-read
+			  "aWhich function: "
+			  (rapture/-get-hook-funcs-names 'after-save-hook))))
+      (rapture/remove-from-hook 'after-save-hook fname local))
+
+  ;;;###autoload
+    (defun rapture/add-after-save-hook (fname &optional local)
+      (interactive "aWhich function: ")
+      ;; write the function to the buffer-file-name for easy
+      ;; removal later on
+      (setf (gethash (buffer-file-name (current-buffer))
+		     rapture/hook-overrides-hash-table)
+	    fname)
+      (setq rapture/last-after-save-hook fname)
+      (add-hook 'after-save-hook fname t local)
+      (message (format "%s will execute after a save" fname)))
+
+      ;;;###autoload
+    (defun rapture/add-after-save-hook-kbd (key-seq &optional local)
+      (interactive
+       (list (read-key-sequence "Press key: ")))
+      (let ((sym (key-binding key-seq)))
+	(cond
+	 ((null sym)
+	  (user-error "No command is bound to %s" (key-description key-seq)))
+	 ((commandp sym)
+	  (rapture/add-after-save-hook sym local)))))
+
+  ;;;###autoload
+    (defun rapture/check-after-save-hook (fname)
+      (-contains? (rapture/-get-hook-funcs-names 'after-save-hook) (symbol-name fname)))
+
+  ;;;###autoload
+    (defun rapture/toggle-last-after-save-hook (&optional local)
+      (interactive)
+      (when rapture/last-after-save-hook
+	(if (rapture/check-after-save-hook rapture/last-after-save-hook)
+	    (progn
+	      (rapture/flash-mode-line rapture/after-save-hook-disabled-color 0.5)
+	      (rapture/remove-after-save-hook rapture/last-after-save-hook local))
+	  ;; else
+	  (rapture/flash-mode-line rapture/after-save-hook-activated-color 0.5)
+	  (rapture/add-after-save-hook rapture/last-after-save-hook local))))
+
+    (defvar rapture/after-save-hook-activated-color "#6AAF6A")
+    (defvar rapture/after-save-hook-disabled-color  "#D70000")
+
+  
+    (evil-define-key 'normal 'global (kbd "SPC a h s k") #'rapture/add-after-save-hook-kbd)
+    (evil-define-key 'normal 'global (kbd "SPC a h s f") #'rapture/add-after-save-hook)
+    (evil-define-key 'normal 'global (kbd "SPC a h s r") #'rapture/remove-after-save-hook)
+#+end_src
+
+*** Last Call feature
+
+#+begin_src emacs-lisp :tangle yes
+  (defvar rapture/last-test-buffer nil)
+  (defvar rapture/last-test-point nil)
+  (defvar rapture/last-test-function nil)
+
+  ;;;###autoload
+  (defun rapture/store-last-test (fname)
+    (interactive "aWhich function: ")
+    (setq rapture/last-test-function fname)
+    (setq rapture/last-test-point (point))
+    (setq rapture/last-test-buffer (current-buffer)))
+
+  ;;;###autoload
+  (defun rapture/call-last-test ()
+    (interactive)
+    (when rapture/last-test-buffer
+      (save-excursion
+	(with-current-buffer rapture/last-test-buffer
+	  (goto-char rapture/last-test-point)
+	  (call-interactively rapture/last-test-function)))))
+
+  ;;;###autoload
+  (defun rapture/run-continously-after-save (key-seq &optional local)
+    "Run the given keybinding after every save on the same buffer and location."
+    (interactive
+     (list (read-key-sequence "Press key: ")))
+    (let ((sym (key-binding key-seq)))
+      (cond
+       ((null sym)
+	(user-error "No command is bound to %s" (key-description key-seq)))
+       ((commandp sym)
+	(progn
+	  (rapture/store-last-test sym)
+	  (rapture/add-after-save-hook 'rapture/call-last-test local))))))
+
+  (evil-define-key 'normal 'global (kbd "SPC a h s s") #'rapture/run-continously-after-save)
+  (evil-define-key 'normal 'global (kbd "SPC a h s t") #'rapture/toggle-last-after-save-hook)
+#+end_src

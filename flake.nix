@@ -23,7 +23,14 @@
 	  inherit system;
 	  overlays = [
 	    (_: _: {
-	      inherit (inputs.self.packages.${pkgs.system}) rapture evil;
+	      inherit (inputs.self.packages.${pkgs.system})
+                rapture
+	        gptel
+	        mcpel
+                revealjs
+                ginkgo-mode
+	        treesitter-context
+	        emacs-claude-code;
 	    })
 	    inputs.emacs-overlay.overlays.default
 	  ];

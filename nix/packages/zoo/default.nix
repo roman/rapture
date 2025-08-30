@@ -1,5 +1,15 @@
-{ rapture, evil }:
+{ rapture }:
 
 rapture.buildEmacs {
-  plugins = [ evil ];
+  plugins = with rapture.plugins; [
+    evil
+    ai
+    ui
+    basics
+    navigation
+    help
+    coding
+    org
+    langs
+  ];
 }

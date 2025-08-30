@@ -1,0 +1,477 @@
+* UI
+** Fancy Splash Window
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq initial-scratch-message nil)
+  (setq inhibit-startup-screen t)
+
+  (defun rapture/show-welcome-buffer ()
+    "Show *Welcome* buffer."
+    (with-current-buffer (get-buffer-create "*Welcome*")
+      (setq truncate-lines t)
+      (let* ((buffer-read-only)
+	     (image-path "@splash@")
+	     (image (create-image image-path))
+	     (size (image-size image))
+	     (height (cdr size))
+	     (width (car size))
+	     (top-margin (floor (/ (- (window-height) height) 2)))
+	     (left-margin (floor (/ (- (window-width) width) 2)))
+	     (prompt-title "Welcome to Emacs!"))
+	(erase-buffer)
+	(setq mode-line-format nil)
+	(goto-char (point-min))
+	(insert (make-string top-margin ?\n ))
+	(insert (make-string left-margin ?\ ))
+	(insert-image image)
+	(insert "\n\n\n")
+	(insert (make-string (floor (/ (- (window-width) (string-width prompt-title)) 2)) ?\ ))
+	(insert prompt-title))
+      (setq cursor-type nil)
+      (read-only-mode +1)
+      (switch-to-buffer (current-buffer))
+      ;; (local-set-key (kbd "q") 'kill-this-buffer)
+      (evil-local-set-key 'normal (kbd "q") #'kill-this-buffer)
+      (evil-local-set-key 'insert (kbd "q") #'kill-this-buffer)))
+
+  (when (< (length command-line-args) 2)
+    (add-hook 'emacs-startup-hook (lambda ()
+				    (when (display-graphic-p)
+				      (rapture/show-welcome-buffer)))))
+#+END_SRC
+
+** Fonts
+
+Use [[https://github.com/tonsky/FiraCode?tab=readme-ov-file#whats-in-the-box][FiraCode]] as the font for the editor
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (defun zoo/set-face-font ()
+    (interactive)
+    (set-face-font 'default "Hasklug Nerd Font 20")
+    (set-frame-font "Hasklug Nerd Font 20" nil t))
+  (zoo/set-face-font)
+  (evil-define-key 'normal 'global (kbd "SPC a f f") #'zoo/set-face-font)
+#+END_SRC
+
+Have a pre-defined set of fonts I can iterate over.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package default-font-presets
+    :config
+    (setq default-font-presets-list
+  	(list
+  	 "Hasklug Nerd Font 20"
+  	 "FiraCode Nerd Font 18"
+  	 "Source Code Pro 20"
+  	 "JetBrains Mono Nerd Font 18"))
+    (evil-define-key 'normal 'global (kbd "SPC a f n") #'default-font-presets-forward)
+    (evil-define-key 'normal 'global (kbd "SPC a f p") #'default-font-presets-backward))
+#+end_src
+
+** Dimmer & Focus
+
+Dim windows around focused window
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package dimmer
+    :config
+    (dimmer-mode 1)
+    (setq dimmer-fraction 0.4)
+    (dimmer-configure-which-key)
+    (dimmer-configure-magit))
+#+end_src
+
+Dim the text of everything except on what I'm focusing on.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package treesitter-context
+    :config
+    (require 'treesitter-context-focus))
+#+end_src
+
+** Ligatures
+
+I want pretty symbols on my code
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package ligature
+    :config
+    ;; Enable the "www" ligature in every possible major mode
+    (ligature-set-ligatures 't '("www"))
+    ;; Enable traditional ligature support in eww-mode, if the
+    ;; `variable-pitch' face supports it
+    (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
+    ;; Enable all Cascadia and Fira Code ligatures in programming modes
+    (ligature-set-ligatures 'prog-mode
+			  '(;; == === ==== => =| =>>=>=|=>==>> ==< =/=//=// =~
+			    ;; =:= =!=
+			    ("=" (rx (+ (or ">" "<" "|" "/" "~" ":" "!" "="))))
+			    ;; ;; ;;;
+			    (";" (rx (+ ";")))
+			    ;; && &&&
+			    ("&" (rx (+ "&")))
+			    ;; !! !!! !. !: !!. != !== !~
+			    ("!" (rx (+ (or "=" "!" "\." ":" "~"))))
+			    ;; ?? ??? ?:  ?=  ?.
+			    ("?" (rx (or ":" "=" "\." (+ "?"))))
+			    ;; %% %%%
+			    ("%" (rx (+ "%")))
+			    ;; |> ||> |||> ||||> |] |} || ||| |-> ||-||
+			    ;; |->>-||-<<-| |- |== ||=||
+			    ;; |==>>==<<==<=>==//==/=!==:===>
+			    ("|" (rx (+ (or ">" "<" "|" "/" ":" "!" "}" "\]"
+					    "-" "=" ))))
+			    ;; \\ \\\ \/
+			    ("\\" (rx (or "/" (+ "\\"))))
+			    ;; ++ +++ ++++ +>
+			    ("+" (rx (or ">" (+ "+"))))
+			    ;; :: ::: :::: :> :< := :// ::=
+			    (":" (rx (or ">" "<" "=" "//" ":=" (+ ":"))))
+			    ;; // /// //// /\ /* /> /===:===!=//===>>==>==/
+			    ("/" (rx (+ (or ">"  "<" "|" "/" "\\" "\*" ":" "!"
+					    "="))))
+			    ;; .. ... .... .= .- .? ..= ..<
+			    ("\." (rx (or "=" "-" "\?" "\.=" "\.<" (+ "\."))))
+			    ;; -- --- ---- -~ -> ->> -| -|->-->>->--<<-|
+			    ("-" (rx (+ (or ">" "<" "|" "~" "-"))))
+			    ;; *> */ *)  ** *** ****
+			    ("*" (rx (or ">" "/" ")" (+ "*"))))
+			    ;; www wwww
+			    ("w" (rx (+ "w")))
+			    ;; <> <!-- <|> <: <~ <~> <~~ <+ <* <$ </  <+> <*>
+			    ;; <$> </> <|  <||  <||| <|||| <- <-| <-<<-|-> <->>
+			    ;; <<-> <= <=> <<==<<==>=|=>==/==//=!==:=>
+			    ;; << <<< <<<<
+			    ("<" (rx (+ (or "\+" "\*" "\$" "<" ">" ":" "~"  "!"
+					    "-"  "/" "|" "="))))
+			    ;; >: >- >>- >--|-> >>-|-> >= >== >>== >=|=:=>>
+			    ;; >> >>> >>>>
+			    (">" (rx (+ (or ">" "<" "|" "/" ":" "=" "-"))))
+			    ;; #: #= #! #( #? #[ #{ #_ #_( ## ### #####
+			    ("#" (rx (or ":" "=" "!" "(" "\?" "\[" "{" "_(" "_"
+					 (+ "#"))))
+			    ;; ~~ ~~~ ~=  ~-  ~@ ~> ~~>
+			    ("~" (rx (or ">" "=" "-" "@" "~>" (+ "~"))))
+			    ;; __ ___ ____ _|_ __|____|_
+			    ("_" (rx (+ (or "_" "|"))))
+			    ;; Fira code: 0xFF 0x12
+			    ("0" (rx (and "x" (+ (in "A-F" "a-f" "0-9")))))
+			    ;; Fira code:
+			    "Fl"  "Tl"  "fi"  "fj"  "fl"  "ft"
+			    ;; The few not covered by the regexps.
+			    "{|"  "[|"  "]#"  "(*"  "}#"  "$>"  "^="))
+    ;; Enables ligature checks globally in all buffers. You can also do it
+    ;; per mode with `ligature-mode'.
+    (global-ligature-mode t))
+#+END_SRC
+
+** Highlight Git Changes
+
+I want special [[https://ianyepan.github.io/posts/emacs-git-gutter/][colored columns]] that indicate git changes in my source
+code
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package git-gutter
+    :hook (prog-mode . git-gutter-mode)
+    :config
+    (setq git-gutter:update-interval 0.02))
+
+  (use-package git-gutter-fringe
+    :config
+    (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+#+end_src
+
+** Highlight Columns
+
+- Highlight indentation columns
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package highlight-indent-guides
+      :init
+      ;; https://emacs.stackexchange.com/a/74191
+      (defun rapture/-dump-face-attributes (face &rest props)
+	(cl-loop for prop in (or props
+				 (sort (mapcar #'car face-attribute-name-alist)
+				       (lambda (s1 s2)
+					 (string< (symbol-name s1) (symbol-name s2)))))
+		 for val = (face-attribute face prop nil t)
+		 unless (eq val 'unspecified)
+		 append (list prop val)))
+      (defun rapture/get-face-attribute (face prop)
+	(plist-get (rapture/-dump-face-attributes face prop) prop))
+
+      :config
+      ;; disable default coloring
+      (setq highlight-indent-guides-auto-enabled nil)
+      (set-face-background
+       'highlight-indent-guides-even-face
+       (rapture/get-face-attribute 'font-lock-type-face :foreground))
+
+      (set-face-background
+	'highlight-indent-guides-odd-face
+	(rapture/get-face-attribute 'font-lock-variable-name-face :foreground))
+
+      ;; ensure we are using the column style
+      (setq highlight-indent-guides-method 'column)
+      (evil-define-key
+	'normal prog-mode-map (kbd "SPC t i")
+	#'highlight-indent-guides-mode))
+  #+end_src
+
+- Highlight max column line
+
+  #+begin_src emacs-lisp :tangle yes
+    (use-package evil
+      :init
+      (setq-default fill-column 92)
+      :config
+      (set-face-foreground 'fill-column-indicator "#ff6e64")
+      (add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+      (evil-define-key
+	'normal prog-mode-map (kbd "SPC t f")
+	#'display-fill-column-indicator-mode))
+  #+end_src
+
+** Rainbow Mode
+
+Show me the color of an HEX
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package rainbow-mode
+    :config
+    (evil-define-key 'normal 'global (kbd "SPC t r") #'rainbow-mode))
+#+end_src
+
+** Window Frame
+
+Remove ugly top frame from the macOS UI
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (setq ns-auto-hide-menu-bar t)
+  ;; (set-frame-position nil 0 -24)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  (menu-bar-mode -1)
+#+END_SRC
+
+Enable both transparent title bar as well as dark appearance, giving a
+minimal window decoration.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+(add-to-list 'default-frame-alist '(ns-appearance . dark))
+#+END_SRC
+
+** Modeline
+
+Leverage [[https://github.com/seagle0128/doom-modeline][doom-emacs modeline]].
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package doom-modeline
+    :after (evil winum)
+    :hook
+    ((after-init . doom-modeline-mode)
+     (prog-mode . column-number-mode))
+    :config
+    (setq doom-modeline-buffer-file-name 'relative-from-project)
+    (setq doom-modeline-always-show-macro-register t)
+    (setq doom-modeline-modal-modern-icon nil))
+#+END_SRC
+
+Also nyan-cat on the modeline
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package nyan-mode
+  :defines (nyan-bar-length)
+  :functions (nyan-mode)
+  :if (display-graphic-p)
+  :custom
+  (setq-default nyan-bar-length 10)
+  :config
+  (nyan-mode +1))
+#+END_SRC
+
+** Golden Ratio
+
+I developed [[https://github.com/roman/golden-ratio.el][golden-ratio]], naturally I'm going to use it.
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package golden-ratio
+    :defines (golden-ratio-auto-scale)
+    :functions (golden-ratio-mode)
+    :after (evil winum)
+    :config
+    (setq golden-ratio-auto-scale t)
+    (golden-ratio-mode)
+    (defadvice evil-window-right
+       (after golden-ratio-resize-window)
+       (golden-ratio)
+       nil)
+    (defadvice evil-window-left
+      (after golden-ratio-resize-window)
+       (golden-ratio)
+       nil)
+    (defadvice evil-window-up
+      (after golden-ratio-resize-window)
+       (golden-ratio)
+       nil)
+    (defadvice evil-window-down
+      (after golden-ratio-resize-window)
+       (golden-ratio)
+       nil)
+    (defadvice winum-select-window-by-number
+	(after golden-ratio-resize-window)
+      (golden-ratio)
+      nil)
+    (ad-activate 'evil-window-up)
+    (ad-activate 'evil-window-down)
+    (ad-activate 'evil-window-left)
+    (ad-activate 'evil-window-right)
+    (ad-activate 'winum-select-window-by-number))
+#+end_src
+
+** Minibuffer
+
+Use vertico as the minibuffer utility
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package vertico
+    :config
+    (vertico-mode))
+#+END_SRC
+
+Use marginalia to get descriptions in the minibuffer
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package marginalia
+    :config
+    (marginalia-mode))
+#+END_SRC
+
+** Search Utilities (consult)
+
+Use embark to export consult searches and modify multiple files at once
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package wgrep)
+
+  (use-package embark
+    :after (wgrep)
+    :init
+    (setq prefix-help-command #'embark-prefix-help-command)
+
+    (defun +embark/export-write ()
+      "Export the current vertico results to a writable buffer if possible.
+       Supports exporting consult-grep to wgrep, file to wdeired, and consult-location to occur-edit"
+      (interactive)
+      (require 'embark)
+      (let* ((edit-command
+	      (pcase-let ((`(,type . ,candidates)
+			   (run-hook-with-args-until-success 'embark-candidate-collectors)))
+		(pcase type
+		  ('consult-grep #'wgrep-change-to-wgrep-mode)
+		  ('file #'wdired-change-to-wdired-mode)
+		  ('consult-location #'occur-edit-mode)
+		  (x (user-error "embark category %S doesn't support writable export" x)))))
+	     (embark-after-export-hook `(,@embark-after-export-hook ,edit-command)))
+	(embark-export)))
+
+    :bind
+    (:map minibuffer-mode-map
+	  ("C-c C-e" . +embark/export-write)
+	  ("C-c C-;" . embark-export)
+	  ("C-c C-l" . embark-collect))
+    :config
+    ;; Hide the mode line of the Embark live/completions buffers
+    (add-to-list 'display-buffer-alist
+		 '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+		   nil
+		   (window-parameters (mode-line-format . none)))))
+#+END_SRC
+
+Use consult to perform searches across multiple APIs
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package consult
+    :after (evil projectile)
+    :init
+    (defun dw/get-project-root ()
+      (when (fboundp 'projectile-project-root)
+	(projectile-project-root)))
+    (defun rapture/ripgrep-dir (dir)
+      (interactive (list (read-directory-name "Directory: " default-directory)))
+      (consult-ripgrep dir))
+
+    :config
+    (evil-define-key 'normal recentf-mode-map (kbd "SPC f r") #'consult-recent-file)
+    (evil-define-key 'normal 'global (kbd "SPC s s") #'consult-line)
+    (evil-define-key 'normal 'global (kbd "SPC s i") #'consult-imenu)
+    (evil-define-key 'normal 'global (kbd "SPC s D") #'rapture/ripgrep-dir)
+    (evil-define-key 'normal
+      projectile-mode-map (kbd "SPC p p") #'consult-ripgrep)
+    (evil-define-key 'normal
+      org-mode-map (kbd "SPC s i") #'consult-org-heading)
+    :custom
+    (consult-project-root-function #'dw/get-project-root)
+    (complete-in-region-function #'consult-completion-in-region))
+#+END_SRC
+
+Integrate both consult and embark
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+(use-package embark-consult
+  :after (consult embark)
+  :hook (embark-collect-mode . consult-preview-at-point-mode))
+#+END_SRC
+
+Use [[https://github.com/minad/consult-flycheck][consult-flycheck]] to search flycheck information
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package consult-flycheck
+    :after (evil consult flycheck)
+    :config
+    (evil-define-key 'normal
+      flycheck-mode-map (kbd "SPC e e") 'consult-flycheck))
+#+END_SRC
+
+Use [[https://github.com/oantolin/orderless][orderless]] to have easy to search terms
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package orderless
+    :init (icomplete-mode)
+    :custom (completion-styles '(orderless)))
+#+END_SRC
+
+** Themes
+*** doom-emacs
+Leverage [[https://github.com/doomemacs/themes?tab=readme-ov-file#manually--use-package][doom-emacs themes]].
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+  (use-package doom-themes
+    :defines (doom-themes-enable-bold doom-themes-enable-italic)
+    :functions (doom-themes-visual-bell-config doom-themes-org-config)
+    :config
+    (setq doom-themes-enable-bold t
+	  doom-themes-enable-italic t)
+    (load-theme 'doom-peacock t)
+    (doom-themes-visual-bell-config)
+    (doom-themes-org-config))
+#+END_SRC
+
+*** timu-macos-theme
+
+Experimenenting with the [[https://gitlab.com/aimebertrand/timu-macos-theme][timu-macos theme]]
+
+#+begin_src emacs-lisp
+  (use-package timu-macos-theme
+    :config
+    (load-theme 'timu-macos t)
+    :custom
+    (customize-set-variable 'timu-macos-mode-line-border-type "border")
+    (customize-set-variable 'timu-macos-mode-line-border t)
+    (customize-set-variable 'timu-macos-org-intense-colors t)
+    (customize-set-variable 'timu-macos-flavour "dark"))
+#+end_src
