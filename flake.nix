@@ -10,43 +10,48 @@
 
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = import inputs.systems;
+
       imports = [
 	inputs.nixDir.flakeModules.default
+	inputs.flake-parts.flakeModules.easyOverlay
       ];
-      systems = import inputs.systems;
+
       nixDir = {
 	enable = true;
 	root = ./.;
       };
-      perSystem = {inputs', system, pkgs, ...}: {
+
+      perSystem = {inputs', system, pkgs, config, ...}: {
 	_module.args.pkgs = import inputs.nixpkgs {
 	  inherit system;
 	  overlays = [
 	    (_: _: {
-	      inherit (inputs.self.packages.${pkgs.system})
-                rapture
-	        gptel
-	        mcpel
-                revealjs
-                ginkgo-mode
-	        treesitter-context
-	        emacs-claude-code;
+	      inherit (config.packages) rapture;
 	    })
 	    inputs.emacs-overlay.overlays.default
 	  ];
 	};
-        checks.toposort = inputs.nix-flake-tests.lib.check {
-          inherit pkgs;
-          tests = import ./nix/lib/toposort_test.nix {
-	    inherit (pkgs) lib;
+
+	overlayAttrs = {
+	  inherit (config.packages) rapture;
+	};
+
+	checks = {
+	  toposort = inputs.nix-flake-tests.lib.check {
+	    inherit pkgs;
+	    tests = import ./nix/lib/toposort_test.nix {
+	      inherit (pkgs) lib;
+	    };
 	  };
-        };
-	checks.rapture = inputs.nix-flake-tests.lib.check {
-	  inherit pkgs;
-	  tests = import ./nix/lib/rapture_test.nix {
-	    inherit (pkgs) lib stdenv writeTextFile replaceVars concatTextFile;
+	  rapture = inputs.nix-flake-tests.lib.check {
+	    inherit pkgs;
+	    tests = import ./nix/lib/rapture_test.nix {
+	      inherit (pkgs) lib stdenv writeTextFile replaceVars concatTextFile;
+	    };
 	  };
 	};
+
       };
     };
 }
