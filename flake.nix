@@ -14,7 +14,6 @@
 
       imports = [
 	inputs.nixDir.flakeModules.default
-	inputs.flake-parts.flakeModules.easyOverlay
       ];
 
       nixDir = {
@@ -22,19 +21,20 @@
 	root = ./.;
       };
 
-      perSystem = {inputs', system, pkgs, config, ...}: {
+      flake.overlays.default =
+	inputs.nixpkgs.lib.composeExtensions
+	  inputs.emacs-overlay.overlays.default
+	  (final: prev: {
+	    inherit (inputs.self.packages.${prev.system}) rapture;
+	  });
+
+      perSystem = {inputs', lib, system, pkgs, config, ...}: {
+
 	_module.args.pkgs = import inputs.nixpkgs {
 	  inherit system;
 	  overlays = [
-	    (_: _: {
-	      inherit (config.packages) rapture;
-	    })
-	    inputs.emacs-overlay.overlays.default
+	    inputs.self.overlays.default
 	  ];
-	};
-
-	overlayAttrs = {
-	  inherit (config.packages) rapture;
 	};
 
 	checks = {

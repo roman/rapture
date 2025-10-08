@@ -1,35 +1,40 @@
-{ self, ... }: {lib, pkgs, config, ...}:
+{ lib, pkgs, config, ... }:
 
 let
   cfg = config.programs.rapture;
 in
 {
-  options.rapture = {
+
+  options.programs.rapture = {
     enable = lib.mkEnableOption
       (lib.mdDoc "rapture emacs configuration");
 
     plugins = lib.mkOption {
-      type = lib.types.listOf [ lib.types.package ];
+      type = lib.types.listOf lib.types.package;
       default = [];
       description = lib.mdDoc "list of rapture plugins to use on this emacs install.";
     };
   };
 
   config =
-    lib.mkIf (cfg.enable) (
+    lib.mkIf cfg.enable (
       let
-	emacs = self.packages.${pkgs.system}.rapture.buildEmacs {
+	emacs = pkgs.rapture.buildEmacs {
 	  inherit (cfg) plugins;
 	};
       in
 	{
+
 	  services.emacs = {
 	    enable = true;
-	    package = emacs;
 	    client.enable = true;
-	    client.arguments = [ "-c" ];
 	    defaultEditor = true;
 	  };
+ 
+          programs.emacs = {
+            enable = true;
+            package = emacs;
+          };
 
           # [editor]: initializing the EDITOR env var to allow git commit messages to work
           # inside the same emacs session.
