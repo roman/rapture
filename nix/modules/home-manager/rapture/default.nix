@@ -40,6 +40,7 @@ in
           enable = true;
           client.enable = true;
           defaultEditor = true;
+          startWithUserSession = "graphical";
         };
         
         programs.emacs = {
