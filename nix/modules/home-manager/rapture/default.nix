@@ -56,9 +56,14 @@ in
           ''));
         };
 
-        # The bash setup below allows vterm buffers to change the current path of the
-        # editor when performing cd commands.
         programs.bash.initExtra = ''
+          # Source home-manager session variables for non-login shells (e.g., vterm).
+          # By default, hm-session-vars.sh is only sourced from .profile (login shells),
+          # so vterm buffers don't inherit variables like SRC_ENDPOINT.
+          . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+
+          # The functions below allow vterm buffers to change the current path of the
+          # editor when performing cd commands.
           vterm_printf() {
             if [ -n "$TMUX" ] && ([ "''${TERM%%-*}" = "tmux" ] || [ "''${TERM%%-*}" = "screen" ] ); then
                 # Tell tmux to pass the escape sequences through
