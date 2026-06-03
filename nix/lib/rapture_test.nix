@@ -2,6 +2,10 @@
 
 let
   api = import ./rapture.nix { inherit lib stdenv concatTextFile replaceVars; };
+  runtimeInput = writeTextFile {
+    name = "runtime-input";
+    text = "";
+  };
   pluginA = api.mkPlugin {
     name = "plugin-a";
     src = writeTextFile {
@@ -20,6 +24,7 @@ plugin A contents
 plugin B contents
       '';
     };
+    runtimeInputs = [ runtimeInput ];
   };
   pluginC = api.mkPlugin {
     name = "plugin-c";
@@ -82,6 +87,16 @@ plugin C contents
 
 	expected = "Hello nix!";
       };
+
+    "test runtime inputs get collected in plugin order" = {
+      expr =
+        let
+	  result = api.buildConfig plugins;
+	in
+	  result.runtimeInputs;
+
+      expected = [ runtimeInput ];
+    };
 
   };
 in

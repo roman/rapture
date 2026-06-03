@@ -1,4 +1,4 @@
-{ callPackage, symlinkJoin, lib, emptyFile, stdenv, concatTextFile, replaceVars, emacs, emacsWithPackagesFromUsePackage }:
+{ callPackage, symlinkJoin, lib, emptyFile, stdenv, concatTextFile, replaceVars, emacs, emacsWithPackagesFromUsePackage, makeWrapper }:
 
 let
   api = import ../../lib/rapture.nix {
@@ -9,6 +9,8 @@ let
     { plugins ? [], package ? emacs }:
       let
 	result = api.buildConfig plugins;
+        runtimeInputs = lib.unique result.runtimeInputs;
+	runtimePath = lib.makeBinPath runtimeInputs;
 	emacs = emacsWithPackagesFromUsePackage {
 	  inherit package;
 	  inherit (result) config extraEmacsPackages override;
@@ -19,7 +21,13 @@ let
       in
 	symlinkJoin {
 	  name = "rapture";
-	  paths = [ emacs ] ++ result.buildInputs;
+	  paths = [ emacs ] ++ result.buildInputs ++ runtimeInputs;
+          nativeBuildInputs = [ makeWrapper ];
+          postBuild = lib.optionalString (runtimePath != "") ''
+            wrapProgram $out/bin/emacs \
+              --prefix PATH : ${lib.escapeShellArg runtimePath} \
+              --set RAPTURE_RUNTIME_PATH ${lib.escapeShellArg runtimePath}
+          '';
 	};
 	
   plugins = {

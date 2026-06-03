@@ -43,11 +43,17 @@ let
   concatPluginBuildInputs = plugins:
     builtins.concatLists (map (plugin: plugin.buildInputs) plugins);
 
+  concatPluginRuntimeInputs = plugins:
+    builtins.concatLists (map (plugin: plugin.runtimeInputs) plugins);
+
   mkPlugin =
     { name,
       version     ? "develop",
       depends     ? (_plugins: []),
       buildInputs ? [],
+      # Executables Emacs subprocesses need after startup. These are added to
+      # the final Emacs wrapper PATH, unlike buildInputs-only resources.
+      runtimeInputs ? [],
       emacsInputs ? (_epkgs: []),
       override    ? (_self: _super: {}),
       vars ? {},
@@ -79,7 +85,7 @@ let
 	# Keys that rapturePlugin derivations will have, these will later be used by the
 	# buildEmacs function to do the topological sorting.
         {
-	  inherit emacsInputs rapturePluginInputs;
+	  inherit emacsInputs rapturePluginInputs runtimeInputs;
 	  pluginOverride = override;
 	};
 
@@ -115,11 +121,12 @@ let
 	config = concatPluginContents sortedPlugins;
         extraEmacsPackages = concatPluginEmacsInputs sortedPlugins;
         buildInputs = concatPluginBuildInputs sortedPlugins;
+        runtimeInputs = concatPluginRuntimeInputs sortedPlugins;
         override = concatPluginOverride sortedPlugins;
     in
       {
 	inherit pluginScope parsedPlugins resolvedPlugins sortedPlugins
-                config extraEmacsPackages buildInputs override;
+                config extraEmacsPackages buildInputs runtimeInputs override;
       };
 in
   {
