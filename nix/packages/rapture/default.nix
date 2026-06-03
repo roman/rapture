@@ -21,7 +21,10 @@ let
       in
 	symlinkJoin {
 	  name = "rapture";
-	  paths = [ emacs ] ++ result.buildInputs ++ runtimeInputs;
+	  # runtimeInputs are only added to the wrapped Emacs PATH. Linking them
+	  # into this output would expose their binaries and can collide with
+	  # packages installed separately by Home Manager, e.g. git's git-jump.
+	  paths = [ emacs ] ++ result.buildInputs;
           nativeBuildInputs = [ makeWrapper ];
           postBuild = lib.optionalString (runtimePath != "") ''
             wrapProgram $out/bin/emacs \

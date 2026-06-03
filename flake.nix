@@ -25,7 +25,10 @@
 	inputs.nixpkgs.lib.composeExtensions
 	  inputs.emacs-overlay.overlays.default
 	  (final: prev: {
-	    inherit (inputs.self.packages.${prev.system}) rapture;
+	    # Use the consumer's package set here. Referencing
+	    # inputs.self.packages would instantiate rapture with this flake's
+	    # pinned nixpkgs, which can differ from the flake applying the overlay.
+	    rapture = final.callPackage ./nix/packages/rapture { };
 	  });
 
       perSystem = {inputs', lib, system, pkgs, config, ...}: {
