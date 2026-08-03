@@ -53,6 +53,21 @@
 	      inherit (pkgs) lib stdenv writeTextFile replaceVars concatTextFile;
 	    };
 	  };
+
+	  # The eval tests above show the check phase reaches the derivation.
+	  # Only a build shows that stdenv runs it for a plugin that builds
+	  # nothing, and that it reads the substituted config rather than the
+	  # placeholders.
+	  rapture-plugin-check-phase = pkgs.rapture.mkPlugin {
+	    name = "plugin-check-phase";
+	    src = pkgs.writeText "config.org" "Hello @user@!";
+	    vars.user = "nix";
+	    checkPhase = ''
+	      runHook preCheck
+	      grep -Fq 'Hello nix!' "$src"
+	      runHook postCheck
+	    '';
+	  };
 	};
 
       };

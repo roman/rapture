@@ -74,40 +74,50 @@ let
       emacsInputs ? (_epkgs: [ ]),
       override ? (_self: _super: { }),
       vars ? { },
+      # Shell commands that validate the plugin, with ordinary stdenv check
+      # phase semantics: they run before the install phase and must call
+      # runHook preCheck/postCheck themselves. $src is the config with `vars`
+      # already substituted, so a suite reads the file the plugin ships.
+      checkPhase ? null,
+      nativeCheckInputs ? [ ],
       src,
     }:
     let
       resolvedSrc = if vars == { } then src else replaceVars src vars;
       # Rename depends so that we have a more domain specific key in the derivation.
       rapturePluginInputs = depends;
-    in
-    stdenv.mkDerivation {
-      # Standard mkDerivation arguments
-      inherit name version buildInputs;
-      dontUnpack = true;
-      dontBuild = true;
-      dontConfigure = true;
-      installPhase = ''
-                    if [ -f "${resolvedSrc}" ]; then
-                      cp ${resolvedSrc} $out
-                    else
-                      echo "Error: Source file not found: ${resolvedSrc}"
-                      exit 1
-                    fi
-        	  '';
-    }
-    //
-      # Keys that rapturePlugin derivations will have, these will later be used by the
-      # buildEmacs function to do the topological sorting.
-      {
-        inherit
-          emacsInputs
-          rapturePluginInputs
-          runtimeInputs
-          fontPackages
-          ;
-        pluginOverride = override;
+      checkArgs = lib.optionalAttrs (checkPhase != null) {
+        doCheck = true;
+        inherit checkPhase nativeCheckInputs;
       };
+    in
+    stdenv.mkDerivation (
+      {
+        # Standard mkDerivation arguments
+        inherit name version buildInputs;
+        src = resolvedSrc;
+        dontUnpack = true;
+        dontBuild = true;
+        dontConfigure = true;
+        installPhase = ''
+          cp "$src" "$out"
+        '';
+        # Keys that rapturePlugin derivations will have, these will later be
+        # used by the buildEmacs function to do the topological sorting. They
+        # live in passthru so that a plugin adding a check phase through
+        # overrideAttrs keeps them.
+        passthru = {
+          inherit
+            emacsInputs
+            rapturePluginInputs
+            runtimeInputs
+            fontPackages
+            ;
+          pluginOverride = override;
+        };
+      }
+      // checkArgs
+    );
 
   topoSort = import ./toposort.nix { inherit lib; } getPluginName getPluginDependencies;
 
