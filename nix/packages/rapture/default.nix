@@ -32,6 +32,29 @@ let
       runtimeInputs = lib.unique result.runtimeInputs;
       finalFontPackages = lib.unique (fontPackages ++ result.fontPackages);
       runtimePath = lib.makeBinPath runtimeInputs;
+      # A launchd agent starts the Emacs daemon with PATH set to
+      # /usr/bin:/bin:/usr/sbin:/sbin. macOS contributes the rest of a normal
+      # PATH — /usr/local/bin and every /etc/paths.d entry — through
+      # path_helper, which /etc/profile runs for login shells only. A daemon is
+      # not one, so subprocesses and terminal buffers lose those directories and
+      # commands installed outside Nix stop resolving. Running path_helper here
+      # gives them the PATH a login shell would have. It puts the system
+      # directories first and appends the inherited entries after them, so the
+      # runtime prefix below still wins.
+      pathHelperArgs = lib.optionals stdenv.hostPlatform.isDarwin [
+        "--run"
+        ''eval "$(/usr/libexec/path_helper -s)"''
+      ];
+      runtimePathArgs = lib.optionals (runtimePath != "") [
+        "--prefix"
+        "PATH"
+        ":"
+        runtimePath
+        "--set"
+        "RAPTURE_RUNTIME_PATH"
+        runtimePath
+      ];
+      wrapperArgs = pathHelperArgs ++ runtimePathArgs;
       emacs = emacsWithPackagesFromUsePackage {
         inherit package;
         inherit (result) config extraEmacsPackages override;
@@ -51,10 +74,8 @@ let
         fontPackages = finalFontPackages;
       };
       nativeBuildInputs = [ makeWrapper ];
-      postBuild = lib.optionalString (runtimePath != "") ''
-        wrapProgram $out/bin/emacs \
-          --prefix PATH : ${lib.escapeShellArg runtimePath} \
-          --set RAPTURE_RUNTIME_PATH ${lib.escapeShellArg runtimePath}
+      postBuild = lib.optionalString (wrapperArgs != [ ]) ''
+        wrapProgram $out/bin/emacs ${lib.escapeShellArgs wrapperArgs}
       '';
     };
 
