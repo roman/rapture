@@ -35,26 +35,42 @@ let
       # A launchd agent starts the Emacs daemon with PATH set to
       # /usr/bin:/bin:/usr/sbin:/sbin. macOS contributes the rest of a normal
       # PATH — /usr/local/bin and every /etc/paths.d entry — through
-      # path_helper, which /etc/profile runs for login shells only. A daemon is
-      # not one, so subprocesses and terminal buffers lose those directories and
-      # commands installed outside Nix stop resolving. Running path_helper here
-      # gives them the PATH a login shell would have. It puts the system
-      # directories first and appends the inherited entries after them, so the
-      # runtime prefix below still wins.
-      pathHelperArgs = lib.optionals stdenv.hostPlatform.isDarwin [
-        "--run"
-        ''eval "$(/usr/libexec/path_helper -s)"''
-      ];
-      runtimePathArgs = lib.optionals (runtimePath != "") [
-        "--prefix"
-        "PATH"
-        ":"
-        runtimePath
-        "--set"
-        "RAPTURE_RUNTIME_PATH"
-        runtimePath
-      ];
-      wrapperArgs = pathHelperArgs ++ runtimePathArgs;
+      # path_helper, which /etc/profile runs for login shells only. Emacs hands
+      # its own PATH to every process it starts, so subprocesses and terminal
+      # buffers cannot resolve commands installed outside Nix.
+      #
+      # path_helper answers with the system directories first and the entries it
+      # inherited after them. Taking that answer whole would reorder the PATH of
+      # an Emacs started from a shell, pushing its front entries — a devenv
+      # profile, ~/.nix-profile/bin — behind /usr/bin. So ask twice: once with an
+      # empty PATH for the system list on its own, once normally for the list
+      # plus whatever was inherited. Removing the first answer from the second
+      # leaves the inherited entries, which go back in front. A daemon inherits
+      # only system directories, so nothing survives that step and it ends up
+      # with the PATH a login shell would have.
+      #
+      # Both calls sit in subshells because path_helper also rewrites MANPATH,
+      # and `M-x man' should keep preferring the Nix profile's pages.
+      wrapperArgs =
+        lib.optionals stdenv.hostPlatform.isDarwin [
+          "--run"
+          ''
+            rapture_system_path=$(eval "$(PATH= /usr/libexec/path_helper -s)"; printf %s "$PATH")
+            rapture_full_path=$(eval "$(/usr/libexec/path_helper -s)"; printf %s "$PATH")
+            rapture_inherited_path=''${rapture_full_path#"$rapture_system_path"}
+            rapture_inherited_path=''${rapture_inherited_path#:}
+            PATH=''${rapture_inherited_path:+$rapture_inherited_path:}$rapture_system_path
+          ''
+        ]
+        ++ lib.optionals (runtimePath != "") [
+          "--prefix"
+          "PATH"
+          ":"
+          runtimePath
+          "--set"
+          "RAPTURE_RUNTIME_PATH"
+          runtimePath
+        ];
       emacs = emacsWithPackagesFromUsePackage {
         inherit package;
         inherit (result) config extraEmacsPackages override;
