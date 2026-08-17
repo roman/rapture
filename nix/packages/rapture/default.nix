@@ -71,6 +71,20 @@ let
           "RAPTURE_RUNTIME_PATH"
           runtimePath
         ];
+      # The Dock, Spotlight and `open -a' start Emacs through the app bundle,
+      # which reaches the binary without passing through bin/emacs. A build that
+      # carries no bundle — emacs-nox, or any non-darwin one — leaves the second
+      # entry point absent, hence the test rather than a platform condition.
+      wrapEntryPoints = ''
+        for entry_point in \
+          "$out/bin/emacs" \
+          "$out/Applications/Emacs.app/Contents/MacOS/Emacs"
+        do
+          if [ -e "$entry_point" ]; then
+            wrapProgram "$entry_point" ${lib.escapeShellArgs wrapperArgs}
+          fi
+        done
+      '';
       emacs = emacsWithPackagesFromUsePackage {
         inherit package;
         inherit (result) config extraEmacsPackages override;
@@ -90,9 +104,7 @@ let
         fontPackages = finalFontPackages;
       };
       nativeBuildInputs = [ makeWrapper ];
-      postBuild = lib.optionalString (wrapperArgs != [ ]) ''
-        wrapProgram $out/bin/emacs ${lib.escapeShellArgs wrapperArgs}
-      '';
+      postBuild = lib.optionalString (wrapperArgs != [ ]) wrapEntryPoints;
     };
 
   plugins = {
