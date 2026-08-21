@@ -42,6 +42,16 @@ in
 
     programs.rapture.finalPackage = pkgs.rapture.buildEmacs {
       inherit (cfg) package plugins fontPackages;
+      # launchd starts the Emacs daemon outside any login shell, so it never
+      # sources hm-session-vars.sh (see programs.bash.initExtra below, which
+      # hardcodes ~/.nix-profile for the same gap in bash buffers instead —
+      # profileDirectory is the option-driven answer to the same question)
+      # and path_helper never knows about a home-manager profile. Restore it
+      # directly instead of shelling out to hm-session-vars.sh at runtime.
+      extraRuntimePrefixes = lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+        config.home.profileDirectory
+        "/run/current-system/sw"
+      ];
     };
 
     home.packages = cfg.finalPackage.fontPackages or [ ];

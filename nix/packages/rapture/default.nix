@@ -26,12 +26,21 @@ let
       plugins ? [ ],
       package ? emacs,
       fontPackages ? [ ],
+      # Prefixes (their /bin appended, as lib.makeBinPath does for every
+      # entry) to add to PATH after the plugin runtime inputs. path_helper
+      # (below) only ever answers with macOS's own /etc/paths and
+      # /etc/paths.d, so it can't restore a caller's own profile directories
+      # (e.g. a home-manager profile) — callers that need those pass them
+      # here instead. Ordered after runtimeInputs so a plugin's pinned tool
+      # is never shadowed by whatever the caller's profile also happens to
+      # install (e.g. its own ripgrep or git).
+      extraRuntimePrefixes ? [ ],
     }:
     let
       result = api.buildConfig plugins;
       runtimeInputs = lib.unique result.runtimeInputs;
       finalFontPackages = lib.unique (fontPackages ++ result.fontPackages);
-      runtimePath = lib.makeBinPath runtimeInputs;
+      runtimePath = lib.makeBinPath (runtimeInputs ++ extraRuntimePrefixes);
       # A launchd agent starts the Emacs daemon with PATH set to
       # /usr/bin:/bin:/usr/sbin:/sbin. macOS contributes the rest of a normal
       # PATH — /usr/local/bin and every /etc/paths.d entry — through
@@ -66,9 +75,6 @@ let
           "--prefix"
           "PATH"
           ":"
-          runtimePath
-          "--set"
-          "RAPTURE_RUNTIME_PATH"
           runtimePath
         ];
       # The Dock, Spotlight and `open -a' start Emacs through the app bundle,
