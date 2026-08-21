@@ -54,7 +54,12 @@ in
       ];
     };
 
-    home.packages = cfg.finalPackage.fontPackages or [ ];
+    # Any home.packages output carrying an Applications/*.app directory gets
+    # published to ~/Applications/Home Manager Apps/ — the emacsClientApp
+    # rides that the same way the Emacs.app bundle itself does.
+    home.packages =
+      (cfg.finalPackage.fontPackages or [ ])
+      ++ lib.optional pkgs.stdenv.hostPlatform.isDarwin (pkgs.rapture.mkEmacsClientApp cfg.finalPackage);
 
     services.emacs = {
       enable = true;

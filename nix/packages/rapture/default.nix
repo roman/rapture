@@ -9,6 +9,7 @@
   emacs,
   emacsWithPackagesFromUsePackage,
   makeWrapper,
+  runCommand,
 }:
 
 let
@@ -20,6 +21,56 @@ let
       replaceVars
       ;
   };
+
+  # A minimal .app bundle whose only job is `emacsclient -nc`, reusing
+  # finalPackage's own Emacs.icns. Dropping its output into home.packages
+  # publishes it to ~/Applications/Home Manager Apps/ — the same mechanism
+  # that already exposes the Emacs.app bundle itself. Takes the finished
+  # package rather than living inside buildEmacs so an `overrideAttrs` on
+  # finalPackage is reflected here too, instead of launching a stale build.
+  mkEmacsClientApp =
+    finalPackage:
+    let
+      icon = "${finalPackage}/Applications/Emacs.app/Contents/Resources/Emacs.icns";
+    in
+    runCommand "rapture-emacs-client-app" { } ''
+      if [ ! -e "${icon}" ]; then
+        echo "rapture: mkEmacsClientApp needs Applications/Emacs.app (an emacs-nox build has none)" >&2
+        exit 1
+      fi
+
+      appDir="$out/Applications/Emacs Client.app/Contents"
+      mkdir -p "$appDir/MacOS" "$appDir/Resources"
+
+      cat > "$appDir/Info.plist" <<'PLIST'
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>CFBundleExecutable</key>
+        <string>EmacsClient</string>
+        <key>CFBundleIconFile</key>
+        <string>Emacs.icns</string>
+        <key>CFBundleIdentifier</key>
+        <string>org.rapture.emacs-client</string>
+        <key>CFBundleName</key>
+        <string>Emacs Client</string>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+      </dict>
+      </plist>
+      PLIST
+
+      cat > "$appDir/MacOS/EmacsClient" <<'SCRIPT'
+      #!/bin/sh
+      # -a "" starts the daemon on demand instead of failing silently when
+      # launchd hasn't brought it up yet (fresh boot, crash-loop backoff).
+      exec "${finalPackage}/bin/emacsclient" -nc -a ""
+      SCRIPT
+      chmod +x "$appDir/MacOS/EmacsClient"
+
+      ln -s "${icon}" "$appDir/Resources/Emacs.icns"
+    '';
 
   buildEmacs =
     {
@@ -139,5 +190,5 @@ stdenv.mkDerivation {
 }
 // {
   inherit (api) mkPlugin;
-  inherit buildEmacs plugins;
+  inherit buildEmacs plugins mkEmacsClientApp;
 }
