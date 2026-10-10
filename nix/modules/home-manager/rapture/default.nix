@@ -68,6 +68,13 @@ in
       startWithUserSession = "graphical";
     };
 
+    # launchd gives a Standard job up to ~75 ms of timer slack, so the
+    # daemon's timers (terminal redraws, debounces) fire visibly late.
+    # Interactive keeps timer latency at the foreground level.
+    launchd.agents.emacs = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+      config.ProcessType = "Interactive";
+    };
+
     programs.emacs = {
       enable = true;
       package = cfg.finalPackage;
